@@ -83,26 +83,29 @@ export default function BoothGrid({
               {isAllMode ? (
                 /* Complete List Headers */
                 <tr>
-                  <th style={{ width: '65px', textAlign: 'center' }}>No.</th>
+                  <th style={{ width: '60px', textAlign: 'center' }}>No.</th>
                   <th>Village / Polling Station</th>
-                  <th>2022 Winner</th>
-                  <th>2024 Winner</th>
-                  <th>Shift / Status</th>
+                  <th>1. 2022 Win</th>
+                  <th>2. 2024 Win</th>
+                  <th>3. 2026 Survey</th>
+                  <th>3-Wave Trajectory</th>
+                  <th style={{ textAlign: 'right' }}>2026 Sample</th>
                   <th style={{ textAlign: 'right' }}>2024 Turnout</th>
-                  <th style={{ textAlign: 'right' }}>Turnout Shift</th>
                   <th style={{ width: '84px', textAlign: 'center' }}>Action</th>
                 </tr>
               ) : (
                 /* Party-Specific Headers */
                 <tr>
-                  <th style={{ width: '65px', textAlign: 'center' }}>No.</th>
+                  <th style={{ width: '60px', textAlign: 'center' }}>No.</th>
                   <th>Village / Polling Station</th>
                   <th style={{ textAlign: 'right' }}>2022 ({selectedParty})</th>
                   <th style={{ textAlign: 'right' }}>2024 ({selectedParty})</th>
-                  <th style={{ textAlign: 'right' }}>Shift</th>
-                  <th>2022 Winner</th>
-                  <th>2024 Winner</th>
-                  <th>Category</th>
+                  <th style={{ textAlign: 'right' }}>2026 Survey</th>
+                  <th style={{ textAlign: 'right' }}>'22→'24 Shift</th>
+                  <th>2022 Win</th>
+                  <th>2024 Win</th>
+                  <th>2026 Survey</th>
+                  <th>Status</th>
                   <th style={{ width: '84px', textAlign: 'center' }}>Action</th>
                 </tr>
               )}
@@ -111,6 +114,7 @@ export default function BoothGrid({
               {booths.map((b) => {
                 const w22 = b.data_2022.winner_party;
                 const w24 = b.data_2024.winner_party;
+                const d26 = b.data_2026 || {};
                 const diff = b.comparison.turnout_diff;
                 const pct = b.comparison.turnout_pct;
 
@@ -145,19 +149,36 @@ export default function BoothGrid({
                       </td>
 
                       <td>
-                        <span className={`cat-pill ${b.comparison.is_flip ? 'lost' : 'won'}`}>
-                          {b.comparison.status_label}
+                        {d26.sample_size > 0 ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span className={`mini-winner ${d26.leading_party}`}>
+                              {d26.leading_party === 'UNDECIDED' ? 'Undecided' : d26.leading_party === 'TIED' ? 'Tied' : d26.leading_party}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }} title={`Top Candidate: ${d26.leading_candidate}`}>
+                              {d26.leading_candidate?.split(' ')[0]}
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pending</span>
+                        )}
+                      </td>
+
+                      <td>
+                        <span className={`cat-pill ${d26.trajectory_code === 'AAP_TRIPLE_STRONGHOLD' ? 'won' : d26.trajectory_code === 'INC_SURGE' ? 'lost' : 'neutral'}`} style={{ fontSize: '0.75rem' }}>
+                          {d26.trajectory || b.comparison.status_label}
                         </span>
                       </td>
 
                       <td style={{ textAlign: 'right', fontWeight: 600 }}>
-                        {b.data_2024.total.toLocaleString()}
+                        {d26.sample_size > 0 ? (
+                          <span>{d26.sample_size} <span className="pct-sub">({d26.total_decided} dec.)</span></span>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>—</span>
+                        )}
                       </td>
 
-                      <td style={{ textAlign: 'right' }}>
-                        <span className={`diff-pill ${diff >= 0 ? 'gain' : 'loss'}`}>
-                          {diff >= 0 ? `+${diff}` : diff} ({pct}%)
-                        </span>
+                      <td style={{ textAlign: 'right', fontWeight: 600 }}>
+                        {b.data_2024.total.toLocaleString()}
                       </td>
 
                       <td style={{ textAlign: 'center' }}>
@@ -192,6 +213,8 @@ export default function BoothGrid({
                 const pct22 = b.data_2022[`${pKey}_pct`] || 0.0;
                 const v24 = b.data_2024[pKey] || 0;
                 const pct24 = b.data_2024[`${pKey}_pct`] || 0.0;
+                const v26 = d26[pKey] || 0;
+                const pct26 = d26[`${pKey}_decided_pct`] || 0.0;
                 const partyDiff = v24 - v22;
                 const swing = (pct24 - pct22).toFixed(1);
 
@@ -239,6 +262,17 @@ export default function BoothGrid({
                     </td>
 
                     <td style={{ textAlign: 'right' }}>
+                      {d26.sample_size > 0 ? (
+                        <>
+                          <strong style={{ color: 'var(--color-gain)' }}>{v26}</strong>
+                          <span className="pct-sub">({pct26}%)</span>
+                        </>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)' }}>—</span>
+                      )}
+                    </td>
+
+                    <td style={{ textAlign: 'right' }}>
                       <span className={`diff-pill ${partyDiff >= 0 ? 'gain' : 'loss'}`}>
                         {partyDiff >= 0 ? `+${partyDiff}` : partyDiff} ({swing > 0 ? `+${swing}%` : `${swing}%`})
                       </span>
@@ -250,6 +284,12 @@ export default function BoothGrid({
 
                     <td>
                       <span className={`mini-winner ${w24}`}>{w24}</span>
+                    </td>
+
+                    <td>
+                      <span className={`mini-winner ${d26.leading_party || 'PENDING'}`}>
+                        {d26.leading_party || 'Pending'}
+                      </span>
                     </td>
 
                     <td>
@@ -288,13 +328,14 @@ export default function BoothGrid({
       )}
 
       {/* =========================================================
-          VIEW MODE 2: MINIMAL GRID CARDS
+          VIEW MODE 2: MINIMAL 3-COLUMN GRID CARDS
       ========================================================= */}
       {viewMode === 'GRID' && (
         <div className="grid-cards-layout">
           {booths.map((b) => {
             const w22 = b.data_2022.winner_party;
             const w24 = b.data_2024.winner_party;
+            const d26 = b.data_2026 || {};
             const diff = b.comparison.turnout_diff;
 
             if (isAllMode) {
@@ -306,8 +347,8 @@ export default function BoothGrid({
                 >
                   <div className="card-top-row">
                     <span className="card-booth-badge">#{b.booth_no}</span>
-                    <span className={`cat-pill ${b.comparison.is_flip ? 'lost' : 'won'}`}>
-                      {b.comparison.status_label}
+                    <span className={`cat-pill ${d26.trajectory_code === 'AAP_TRIPLE_STRONGHOLD' ? 'won' : d26.trajectory_code === 'INC_SURGE' ? 'lost' : 'neutral'}`} style={{ fontSize: '0.7rem' }}>
+                      {d26.trajectory || b.comparison.status_label}
                     </span>
                   </div>
 
@@ -316,7 +357,7 @@ export default function BoothGrid({
 
                   <div className="card-stats-box">
                     <div className="card-stat-col">
-                      <span className="card-stat-label">2022 Winner</span>
+                      <span className="card-stat-label">2022 Win</span>
                       <span className={`mini-winner ${w22}`} style={{ marginTop: '3px' }}>
                         {w22} (+{b.data_2022.margin})
                       </span>
@@ -324,19 +365,29 @@ export default function BoothGrid({
                     </div>
 
                     <div className="card-stat-col">
-                      <span className="card-stat-label">2024 Winner</span>
+                      <span className="card-stat-label">2024 Win</span>
                       <span className={`mini-winner ${w24}`} style={{ marginTop: '3px' }}>
                         {w24} (+{b.data_2024.margin})
                       </span>
                       <span className="pct-sub" style={{ margin: '4px 0 0 0' }}>{b.data_2024.total} polled</span>
                     </div>
+
+                    <div className="card-stat-col">
+                      <span className="card-stat-label">2026 Survey</span>
+                      <span className={`mini-winner ${d26.leading_party || 'PENDING'}`} style={{ marginTop: '3px' }}>
+                        {d26.leading_party === 'UNDECIDED' ? 'Undecided' : d26.leading_party === 'TIED' ? 'Tied' : (d26.leading_party || 'Pending')}
+                      </span>
+                      <span className="pct-sub" style={{ margin: '4px 0 0 0' }}>
+                        {d26.sample_size > 0 ? `${d26.sample_size} sampled` : 'Pending'}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="card-footer-row">
                     <div>
-                      <span className="footer-label">Turnout: </span>
-                      <span className={`diff-pill ${diff >= 0 ? 'gain' : 'loss'}`}>
-                        {diff >= 0 ? `+${diff}` : diff}
+                      <span className="footer-label">Sample/Turnout: </span>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {d26.sample_size || 0} spl / {b.data_2024.total}
                       </span>
                     </div>
                     <button
@@ -360,6 +411,8 @@ export default function BoothGrid({
             const pct22 = b.data_2022[`${pKey}_pct`] || 0.0;
             const v24 = b.data_2024[pKey] || 0;
             const pct24 = b.data_2024[`${pKey}_pct`] || 0.0;
+            const v26 = d26[pKey] || 0;
+            const pct26 = d26[`${pKey}_decided_pct`] || 0.0;
             const partyDiff = v24 - v22;
 
             let catLabel = 'Lost Both';
@@ -406,11 +459,28 @@ export default function BoothGrid({
                     <strong>{v24}</strong> <span className="pct-sub">({pct24}%)</span>
                     <span className={`mini-winner ${w24}`} style={{ marginTop: '4px' }}>{w24} Won</span>
                   </div>
+
+                  <div className="card-stat-col">
+                    <span className="card-stat-label">2026 Survey</span>
+                    {d26.sample_size > 0 ? (
+                      <>
+                        <strong style={{ color: 'var(--color-gain)' }}>{v26}</strong> <span className="pct-sub">({pct26}% dec.)</span>
+                        <span className={`mini-winner ${d26.leading_party}`} style={{ marginTop: '4px' }}>
+                          {d26.leading_party} Lead
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ color: 'var(--text-muted)' }}>Pending</span>
+                        <span className="pct-sub" style={{ marginTop: '4px' }}>Awaiting sample</span>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div className="card-footer-row">
                   <div>
-                    <span className="footer-label">Shift: </span>
+                    <span className="footer-label">'22→'24 Shift: </span>
                     <span className={`diff-pill ${partyDiff >= 0 ? 'gain' : 'loss'}`}>
                       {partyDiff >= 0 ? `+${partyDiff}` : partyDiff}
                     </span>

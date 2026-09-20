@@ -138,6 +138,16 @@ export default function App() {
         result = result.filter(b => b.comparison.is_flip);
       } else if (partyFilter === 'RETAINED_ONLY') {
         result = result.filter(b => !b.comparison.is_flip);
+      } else if (partyFilter === 'SURVEY_AAP_LEADS') {
+        result = result.filter(b => b.data_2026?.leading_party === 'AAP');
+      } else if (partyFilter === 'SURVEY_INC_LEADS') {
+        result = result.filter(b => b.data_2026?.leading_party === 'INC');
+      } else if (partyFilter === 'SURVEY_BJP_LEADS') {
+        result = result.filter(b => b.data_2026?.leading_party === 'BJP');
+      } else if (partyFilter === 'SURVEY_UNDECIDED') {
+        result = result.filter(b => b.data_2026?.leading_party === 'UNDECIDED' || b.data_2026?.other_pct >= 70);
+      } else if (partyFilter === 'SURVEY_PENDING') {
+        result = result.filter(b => !b.data_2026 || b.data_2026?.sample_size === 0);
       }
     } else {
       // Party-specific mode (AAP, INC, SAD, BJP)
@@ -163,6 +173,9 @@ export default function App() {
           if (partyFilter === 'LOST_BOTH') {
             return w22 !== selectedParty && w24 !== selectedParty;
           }
+          if (partyFilter === 'SURVEY_LEAD') {
+            return b.data_2026?.leading_party === selectedParty;
+          }
           return true;
         });
       }
@@ -182,6 +195,12 @@ export default function App() {
           return b.data_2024.total - a.data_2024.total;
         case 'MARGIN_DESC':
           return b.data_2024.margin - a.data_2024.margin;
+        case 'SURVEY_SAMPLE_DESC':
+          return (b.data_2026?.sample_size || 0) - (a.data_2026?.sample_size || 0);
+        case 'SURVEY_AAP_DESC':
+          return (b.data_2026?.aap || 0) - (a.data_2026?.aap || 0);
+        case 'SURVEY_INC_DESC':
+          return (b.data_2026?.inc || 0) - (a.data_2026?.inc || 0);
         case 'BOOTH_ASC':
         default:
           return a.booth_no - b.booth_no;
@@ -194,10 +213,13 @@ export default function App() {
   // Sort options for CustomDropdown
   const sortOptions = useMemo(() => {
     const opts = [
-      { value: 'BOOTH_ASC', label: 'Booth No. (1 → 223)' },
-      { value: 'BOOTH_DESC', label: 'Booth No. (223 → 1)' },
+      { value: 'BOOTH_ASC', label: 'Booth No. (1 → 169)' },
+      { value: 'BOOTH_DESC', label: 'Booth No. (169 → 1)' },
       { value: 'TURNOUT_DESC', label: 'Highest 2024 Turnout' },
       { value: 'MARGIN_DESC', label: 'Highest 2024 Margin' },
+      { value: 'SURVEY_SAMPLE_DESC', label: 'Highest 2026 Survey Sample' },
+      { value: 'SURVEY_AAP_DESC', label: 'Highest 2026 AAP Preference' },
+      { value: 'SURVEY_INC_DESC', label: 'Highest 2026 INC Preference' },
     ];
     if (selectedParty !== 'ALL') {
       opts.push(
@@ -298,9 +320,31 @@ export default function App() {
 
             <div className="title-action-buttons">
               <a 
+                href="./Amritsar_South_AC19_2022_vs_2024_Booth_List.xlsx" 
+                download="Amritsar_South_AC19_2022_vs_2024_Booth_List.xlsx"
+                className="pill-action-btn green"
+                style={{ background: '#059669', color: '#ffffff', borderColor: '#047857' }}
+                title="Download Verified 2022 vs 2024 Booth List (Excel .xlsx with English & Punjabi Sheets)"
+              >
+                <span className="pill-btn-icon"><FileSpreadsheet size={14} /></span>
+                <span className="pill-btn-label">2022 vs 2024 Booth List (Excel)</span>
+              </a>
+
+              <a 
+                href="./Amritsar_South_AC19_2022_vs_2024_Booth_List.pdf" 
+                download="Amritsar_South_AC19_2022_vs_2024_Booth_List.pdf"
+                className="pill-action-btn red"
+                style={{ background: '#dc2626', color: '#ffffff', borderColor: '#b91c1c' }}
+                title="Download Verified 2022 vs 2024 Booth List PDF (36-Page Print Ready)"
+              >
+                <span className="pill-btn-icon"><Printer size={14} /></span>
+                <span className="pill-btn-label">2022 vs 2024 Booth List (PDF)</span>
+              </a>
+
+              <a 
                 href="./Amritsar_South_Master_Booth_Analysis_AAP_INC.xlsx" 
                 download="Amritsar_South_Master_Booth_Analysis_AAP_INC.xlsx"
-                className="pill-action-btn green"
+                className="pill-action-btn outline"
                 title="Download Master Analysis Spreadsheet (Excel .xlsx with AAP/INC/BJP/SAD Sheets)"
               >
                 <span className="pill-btn-icon"><FileSpreadsheet size={14} /></span>
@@ -314,7 +358,7 @@ export default function App() {
                 title="Download Complete 169-Booth Master Plan in English (PDF with Watermark)"
               >
                 <span className="pill-btn-icon"><ClipboardList size={14} /></span>
-                <span className="pill-btn-label">Master Plan (English PDF)</span>
+                <span className="pill-btn-label">Master Plan (EN PDF)</span>
               </a>
 
               <a 
@@ -324,7 +368,7 @@ export default function App() {
                 title="Download 169 Boothwise Detailed Field Operations Plan in Punjabi (PDF with Watermark)"
               >
                 <span className="pill-btn-icon"><ClipboardList size={14} /></span>
-                <span className="pill-btn-label">169 ਬੂਥ ਮਾਸਟਰ ਪਲਾਨ (ਪੰਜਾਬੀ PDF)</span>
+                <span className="pill-btn-label">ਮਾਸਟਰ ਪਲਾਨ (ਪੰਜਾਬੀ PDF)</span>
               </a>
 
               <button 
@@ -338,7 +382,7 @@ export default function App() {
             </div>
           </section>
 
-          {/* Dsidein 4 Minimal KPI Metric Cards */}
+          {/* Dsidein 5 Minimal KPI Metric Cards */}
           <section className="dsidein-kpi-grid">
             {/* KPI 1: Live Telemetry */}
             <div className="dsidein-kpi-card">
@@ -368,7 +412,21 @@ export default function App() {
               </div>
             </div>
 
-            {/* KPI 3: AAP - Leader */}
+            {/* KPI 3: 2026 Ground Survey */}
+            <div className="dsidein-kpi-card survey-kpi">
+              <div className="kpi-top-row">
+                <div className="kpi-icon-pill" style={{ background: 'rgba(5, 150, 105, 0.12)', color: '#059669' }}>
+                  <Users size={18} />
+                </div>
+              </div>
+              <div className="kpi-label">2026 GROUND SURVEY</div>
+              <div className="kpi-value" style={{ color: '#059669' }}>2,159 Sample</div>
+              <div className="kpi-sub-pill" style={{ color: '#059669', background: 'rgba(5, 150, 105, 0.08)' }}>
+                ● 149 Booths | AAP 57.6% vs INC 35.5% Dec.
+              </div>
+            </div>
+
+            {/* KPI 4: AAP - 2024 Win */}
             <div className="dsidein-kpi-card aap-kpi">
               <div className="kpi-top-row">
                 <div className="kpi-icon-pill icon-blue">
@@ -382,7 +440,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* KPI 4: BJP - Urban Surge */}
+            {/* KPI 5: BJP - 2024 Urban Surge */}
             <div className="dsidein-kpi-card bjp-kpi">
               <div className="kpi-top-row">
                 <div className="kpi-icon-pill icon-orange">

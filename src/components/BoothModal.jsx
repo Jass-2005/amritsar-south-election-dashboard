@@ -7,6 +7,7 @@ export default function BoothModal({ booth, onClose }) {
 
   const d22 = booth.data_2022;
   const d24 = booth.data_2024;
+  const d26 = booth.data_2026 || {};
   const comp = booth.comparison;
 
   // Safe percentage helper
@@ -39,9 +40,9 @@ export default function BoothModal({ booth, onClose }) {
         <div className="print-dossier-banner">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <div className="print-dossier-title">19-AMRITSAR SOUTH ASSEMBLY SEGMENT — BOOTH DOSSIER</div>
+              <div className="print-dossier-title">19-AMRITSAR SOUTH ASSEMBLY SEGMENT — 3-COLUMN BOOTH DOSSIER</div>
               <div className="print-dossier-sub">
-                Election Commission Data: 2022 Assembly vs 2024 Parliamentary Analysis
+                2022 Assembly Election vs 2024 Parliamentary Election vs 2026 Field Survey Analysis
               </div>
             </div>
             <div style={{ textAlign: 'right', fontSize: '8.5pt', color: '#334155' }}>
@@ -54,11 +55,16 @@ export default function BoothModal({ booth, onClose }) {
         {/* Modal Header */}
         <div className="modal-header">
           <div>
-            <div className="modal-badges-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="modal-badges-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span className="brand-badge">Booth #{booth.booth_no}</span>
               <span className={`status-badge ${comp.is_flip ? 'flipped' : 'retained'}`}>
                 {comp.status_label}
               </span>
+              {d26.trajectory && (
+                <span className="status-badge" style={{ background: 'rgba(5, 150, 105, 0.12)', color: 'var(--color-gain)', borderColor: 'rgba(5, 150, 105, 0.3)' }}>
+                  {d26.trajectory}
+                </span>
+              )}
             </div>
             <h2 className="modal-village-title">{booth.village_english || booth.village_en}</h2>
             <p className="modal-village-sub punjabi-text">
@@ -80,11 +86,11 @@ export default function BoothModal({ booth, onClose }) {
           </div>
         </div>
 
-        {/* Side-by-side Comparative Cards */}
+        {/* 3-Column Side-by-side Comparative Cards */}
         <div className="compare-grid">
-          {/* 2022 Assembly Column */}
+          {/* COLUMN 1: 2022 Assembly Column */}
           <div className="year-card">
-            <div className="year-title">2022 Assembly Election</div>
+            <div className="year-title">1. 2022 Assembly Election</div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
               <span className={`badge-winner ${d22.winner_party}`}>
                 {d22.winner_party} Won
@@ -145,9 +151,9 @@ export default function BoothModal({ booth, onClose }) {
             </div>
           </div>
 
-          {/* 2024 Lok Sabha Column */}
+          {/* COLUMN 2: 2024 Lok Sabha Column */}
           <div className="year-card">
-            <div className="year-title">2024 Lok Sabha Election</div>
+            <div className="year-title">2. 2024 Lok Sabha Election</div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
               <span className={`badge-winner ${d24.winner_party}`}>
                 {d24.winner_party} Won
@@ -202,10 +208,99 @@ export default function BoothModal({ booth, onClose }) {
             </div>
 
             {/* Total 2024 */}
-            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '8px', marginTop: '8px', fontSize: '0.8125rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '8px', marginTop: '12px', fontSize: '0.8125rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
               <span>Total Polled:</span>
               <strong style={{ color: 'var(--text-primary)' }}>{d24.total}</strong>
             </div>
+          </div>
+
+          {/* COLUMN 3: 2026 Ground Survey Column */}
+          <div className="year-card survey-card" style={{ borderColor: 'rgba(5, 150, 105, 0.3)' }}>
+            <div className="year-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--color-gain)', fontWeight: 700 }}>3. 2026 Field Survey</span>
+              <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(5, 150, 105, 0.12)', color: 'var(--color-gain)', fontWeight: 700 }}>
+                {d26.sample_size > 0 ? `${d26.sample_size} Sampled` : 'Pending'}
+              </span>
+            </div>
+
+            {d26.sample_size > 0 ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <span className={`badge-winner ${d26.leading_party}`}>
+                    {d26.leading_party === 'UNDECIDED' ? 'Undecided' : d26.leading_party === 'TIED' ? 'Tied' : `${d26.leading_party} Leading`}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`Preferred Candidate: ${d26.leading_candidate}`}>
+                    ★ {d26.leading_candidate}
+                  </span>
+                </div>
+
+                {/* AAP Survey Bar */}
+                <div className="vote-bar-wrap">
+                  <div className="vote-bar-label">
+                    <span>AAP (Dr. Nijjar)</span>
+                    <span><strong>{d26.aap}</strong> ({d26.aap_decided_pct}% dec.)</span>
+                  </div>
+                  <div className="vote-bar-track">
+                    <div className="vote-bar-fill" style={{ width: getWidth(d26.aap, d26.sample_size), background: 'var(--color-aap)' }} />
+                  </div>
+                </div>
+
+                {/* INC Survey Bar */}
+                <div className="vote-bar-wrap">
+                  <div className="vote-bar-label">
+                    <span>INC (Bolaria)</span>
+                    <span><strong>{d26.inc}</strong> ({d26.inc_decided_pct}% dec.)</span>
+                  </div>
+                  <div className="vote-bar-track">
+                    <div className="vote-bar-fill" style={{ width: getWidth(d26.inc, d26.sample_size), background: 'var(--color-inc)' }} />
+                  </div>
+                </div>
+
+                {/* BJP Survey Bar */}
+                <div className="vote-bar-wrap">
+                  <div className="vote-bar-label">
+                    <span>BJP (Thekedar/BJP)</span>
+                    <span><strong>{d26.bjp}</strong> ({d26.bjp_decided_pct}% dec.)</span>
+                  </div>
+                  <div className="vote-bar-track">
+                    <div className="vote-bar-fill" style={{ width: getWidth(d26.bjp, d26.sample_size), background: 'var(--color-bjp)' }} />
+                  </div>
+                </div>
+
+                {/* SAD Survey Bar */}
+                <div className="vote-bar-wrap">
+                  <div className="vote-bar-label">
+                    <span>SAD (Tikka/SAD)</span>
+                    <span><strong>{d26.sad}</strong> ({d26.sad_decided_pct}% dec.)</span>
+                  </div>
+                  <div className="vote-bar-track">
+                    <div className="vote-bar-fill" style={{ width: getWidth(d26.sad, d26.sample_size), background: 'var(--color-sad, #7c3aed)' }} />
+                  </div>
+                </div>
+
+                {/* Silent / Undecided Survey Bar */}
+                <div className="vote-bar-wrap">
+                  <div className="vote-bar-label">
+                    <span>Silent / Undecided / Other</span>
+                    <span><strong>{d26.other}</strong> ({d26.other_pct}%)</span>
+                  </div>
+                  <div className="vote-bar-track">
+                    <div className="vote-bar-fill" style={{ width: getWidth(d26.other, d26.sample_size), background: '#94a3b8' }} />
+                  </div>
+                </div>
+
+                {/* Total Sample */}
+                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '8px', marginTop: '12px', fontSize: '0.8125rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Sample Size:</span>
+                  <strong style={{ color: 'var(--text-primary)' }}>{d26.sample_size} Voters ({d26.total_decided} Decided)</strong>
+                </div>
+              </>
+            ) : (
+              <div style={{ padding: '32px 12px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <p style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>Awaiting Survey Sample</p>
+                <p style={{ fontSize: '0.75rem', lineHeight: 1.4 }}>Field team scheduled to complete interviews for Booth #{booth.booth_no} in next wave.</p>
+              </div>
+            )}
           </div>
         </div>
 

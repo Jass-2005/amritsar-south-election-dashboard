@@ -1694,8 +1694,8 @@
   border-radius: var(--radius-sm);
   padding: 8px 10px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
   font-size: 0.75rem;
   margin-bottom: 8px;
 }
@@ -1775,12 +1775,18 @@
   background: var(--bg-surface-elevated);
 }
 
-/* Compare in Modal */
+/* Compare in Modal - 3-Column Comparative Grid */
 .compare-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 16px;
+}
+
+@media (max-width: 960px) {
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .year-card {
@@ -1788,6 +1794,13 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.year-card.survey-card {
+  border-color: rgba(5, 150, 105, 0.35);
+  background: var(--bg-surface-elevated);
 }
 
 .year-title {

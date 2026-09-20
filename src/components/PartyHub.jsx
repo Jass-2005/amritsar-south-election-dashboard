@@ -26,6 +26,7 @@ export default function PartyHub({
   const bjpWins = summary?.booths_won_2024?.BJP || 35;
   const incWins = summary?.booths_won_2024?.INC || 32;
   const sadWins = summary?.booths_won_2024?.SAD || 0;
+  const m26 = summary?.metrics_2026_survey || {};
 
   // Retained & Flipped counts
   const retainedCount = 107; // AAP 99 + INC 8
@@ -99,7 +100,7 @@ export default function PartyHub({
               <div className="vital-item">
                 <span className="vital-lbl">Turnout</span>
                 <span className="vital-val">{summary?.total_votes_2024?.toLocaleString() || '82,725'}</span>
-                <span className="vital-sub">Form-20 EVM Verified</span>
+                <span className="vital-sub">Form-20 EVM</span>
               </div>
               <span className="vital-divider" aria-hidden="true" />
               <div className="vital-item lead-aap">
@@ -109,8 +110,9 @@ export default function PartyHub({
               </div>
               <span className="vital-divider hide-mobile" aria-hidden="true" />
               <div className="vital-item hide-mobile">
-                <span className="vital-lbl">Seats '24</span>
-                <span className="vital-val">AAP: {aapWins} · BJP: {bjpWins} · INC: {incWins} · SAD: {sadWins}</span>
+                <span className="vital-lbl">’26 Survey</span>
+                <span className="vital-val" style={{ color: 'var(--color-gain)' }}>2,159 Sample</span>
+                <span className="vital-sub">AAP 57.6% · INC 35.5% Dec.</span>
               </div>
             </>
           ) : (
@@ -128,20 +130,12 @@ export default function PartyHub({
               </div>
               <span className="vital-divider" aria-hidden="true" />
               <div className="vital-item">
-                <span className="vital-lbl">Swing</span>
-                <span className={`vital-val ${currentStats.swing >= 0 ? 'shift-gain' : 'shift-loss'}`}>
-                  {currentStats.swing >= 0 ? `+${currentStats.swing}%` : `${currentStats.swing}%`}
+                <span className="vital-lbl">’26 Survey</span>
+                <span className="vital-val" style={{ color: 'var(--color-gain)' }}>
+                  {m26.party_shares_decided?.[selectedParty] || 0}% Dec.
                 </span>
                 <span className="vital-sub">
-                  ({currentStats.vote_diff >= 0 ? `+${currentStats.vote_diff.toLocaleString()}` : currentStats.vote_diff.toLocaleString()} votes)
-                </span>
-              </div>
-              <span className="vital-divider hide-mobile" aria-hidden="true" />
-              <div className="vital-item hide-mobile">
-                <span className="vital-lbl">Booths</span>
-                <span className="vital-val">{currentStats.booths_won_2022} → {currentStats.booths_won_2024}</span>
-                <span className="vital-sub">
-                  ({currentStats.booths_won_2024 - currentStats.booths_won_2022 >= 0 ? `+${currentStats.booths_won_2024 - currentStats.booths_won_2022}` : currentStats.booths_won_2024 - currentStats.booths_won_2022})
+                  {m26.party_counts?.[selectedParty] || 0} prefs ({m26.booths_led?.[selectedParty] || 0} leads)
                 </span>
               </div>
             </>
@@ -255,6 +249,33 @@ export default function PartyHub({
               <span>Retained</span>
               <span className="cat-pill-num">{retainedCount}</span>
             </button>
+            <button
+              className={`cat-pill-btn ${partyFilter === 'SURVEY_AAP_LEADS' ? 'active aap-active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'SURVEY_AAP_LEADS' ? 'ALL' : 'SURVEY_AAP_LEADS')}
+              title="Booths where AAP leads in 2026 ground survey"
+            >
+              <Award size={13} className="pill-icon aap-text" />
+              <span>'26 AAP Lead</span>
+              <span className="cat-pill-num">{m26.booths_led?.AAP || 65}</span>
+            </button>
+            <button
+              className={`cat-pill-btn ${partyFilter === 'SURVEY_INC_LEADS' ? 'active inc-active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'SURVEY_INC_LEADS' ? 'ALL' : 'SURVEY_INC_LEADS')}
+              title="Booths where INC leads in 2026 ground survey"
+            >
+              <Award size={13} className="pill-icon inc-text" />
+              <span>'26 INC Lead</span>
+              <span className="cat-pill-num">{m26.booths_led?.INC || 26}</span>
+            </button>
+            <button
+              className={`cat-pill-btn ${partyFilter === 'SURVEY_UNDECIDED' ? 'active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'SURVEY_UNDECIDED' ? 'ALL' : 'SURVEY_UNDECIDED')}
+              title="Booths with high silent or undecided voters in 2026 survey"
+            >
+              <AlertTriangle size={13} />
+              <span>'26 Undecided/Swing</span>
+              <span className="cat-pill-num">{m26.booths_led?.UNDECIDED || 44}</span>
+            </button>
           </div>
         ) : (
           <div className="cat-pill-group">
@@ -295,20 +316,29 @@ export default function PartyHub({
             <button
               className={`cat-pill-btn weak ${partyFilter === 'WEAK' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
               onClick={() => setPartyFilter(partyFilter === 'WEAK' ? 'ALL' : 'WEAK')}
-              title={`Weak booth: less than 20% vote share for ${selectedParty}`}
+              title={`Vote share fell below 20% in 2024 for ${selectedParty}`}
             >
               <AlertTriangle size={13} />
               <span>Weak (&lt;20%)</span>
               <span className="cat-pill-num">{currentStats.weak_count}</span>
             </button>
             <button
-              className={`cat-pill-btn deficit ${partyFilter === 'LOST_BOTH' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
+              className={`cat-pill-btn lost-both ${partyFilter === 'LOST_BOTH' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
               onClick={() => setPartyFilter(partyFilter === 'LOST_BOTH' ? 'ALL' : 'LOST_BOTH')}
-              title={`Opponent bastions in both 2022 & 2024`}
+              title={`Lost both 2022 and 2024 by ${selectedParty}`}
             >
               <ShieldAlert size={13} />
               <span>Lost Both</span>
               <span className="cat-pill-num">{currentStats.lost_both_count}</span>
+            </button>
+            <button
+              className={`cat-pill-btn won ${partyFilter === 'SURVEY_LEAD' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'SURVEY_LEAD' ? 'ALL' : 'SURVEY_LEAD')}
+              title={`Booths where ${selectedParty} leads in 2026 ground survey`}
+            >
+              <Award size={13} />
+              <span>'26 Survey Lead</span>
+              <span className="cat-pill-num">{m26.booths_led?.[selectedParty] || 0}</span>
             </button>
           </div>
         )}
