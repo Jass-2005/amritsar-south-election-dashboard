@@ -100,7 +100,7 @@ export default function PartyHub({
               <div className="vital-item">
                 <span className="vital-lbl">Turnout</span>
                 <span className="vital-val">{summary?.total_votes_2024?.toLocaleString() || '82,725'}</span>
-                <span className="vital-sub">Form-20 EVM</span>
+                <span className="vital-sub">Form-20 EVM Verified</span>
               </div>
               <span className="vital-divider" aria-hidden="true" />
               <div className="vital-item lead-aap">
@@ -111,8 +111,8 @@ export default function PartyHub({
               <span className="vital-divider hide-mobile" aria-hidden="true" />
               <div className="vital-item hide-mobile">
                 <span className="vital-lbl">’26 Survey</span>
-                <span className="vital-val" style={{ color: 'var(--color-gain)' }}>2,159 Sample</span>
-                <span className="vital-sub">AAP 57.6% · INC 35.5% Dec.</span>
+                <span className="vital-val" style={{ color: 'var(--color-gain)' }}>16,732 Sample</span>
+                <span className="vital-sub">AAP 82 · INC 83 Leads (35% Und.)</span>
               </div>
             </>
           ) : (
@@ -135,7 +135,15 @@ export default function PartyHub({
                   {m26.party_shares_decided?.[selectedParty] || 0}% Dec.
                 </span>
                 <span className="vital-sub">
-                  {m26.party_counts?.[selectedParty] || 0} prefs ({m26.booths_led?.[selectedParty] || 0} leads)
+                  ({m26.booths_led?.[selectedParty] || 0} booth leads)
+                </span>
+              </div>
+              <span className="vital-divider hide-mobile" aria-hidden="true" />
+              <div className="vital-item hide-mobile">
+                <span className="vital-lbl">Booths</span>
+                <span className="vital-val">{currentStats.booths_won_2022} → {currentStats.booths_won_2024}</span>
+                <span className="vital-sub">
+                  ({currentStats.booths_won_2024 - currentStats.booths_won_2022 >= 0 ? `+${currentStats.booths_won_2024 - currentStats.booths_won_2022}` : currentStats.booths_won_2024 - currentStats.booths_won_2022})
                 </span>
               </div>
             </>
@@ -256,7 +264,7 @@ export default function PartyHub({
             >
               <Award size={13} className="pill-icon aap-text" />
               <span>'26 AAP Lead</span>
-              <span className="cat-pill-num">{m26.booths_led?.AAP || 65}</span>
+              <span className="cat-pill-num">{m26.booths_led?.AAP || 86}</span>
             </button>
             <button
               className={`cat-pill-btn ${partyFilter === 'SURVEY_INC_LEADS' ? 'active inc-active' : ''}`}
@@ -265,16 +273,16 @@ export default function PartyHub({
             >
               <Award size={13} className="pill-icon inc-text" />
               <span>'26 INC Lead</span>
-              <span className="cat-pill-num">{m26.booths_led?.INC || 26}</span>
+              <span className="cat-pill-num">{m26.booths_led?.INC || 79}</span>
             </button>
             <button
-              className={`cat-pill-btn ${partyFilter === 'SURVEY_UNDECIDED' ? 'active' : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'SURVEY_UNDECIDED' ? 'ALL' : 'SURVEY_UNDECIDED')}
-              title="Booths with high silent or undecided voters in 2026 survey"
+              className={`cat-pill-btn ${partyFilter === 'SURVEY_TIED' ? 'active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'SURVEY_TIED' ? 'ALL' : 'SURVEY_TIED')}
+              title="Booths where AAP and INC are Tied in 2026 ground survey"
             >
-              <AlertTriangle size={13} />
-              <span>'26 Undecided/Swing</span>
-              <span className="cat-pill-num">{m26.booths_led?.UNDECIDED || 44}</span>
+              <Flame size={13} />
+              <span>'26 Tied/Battleground</span>
+              <span className="cat-pill-num">{m26.booths_led?.TIED || 4}</span>
             </button>
           </div>
         ) : (

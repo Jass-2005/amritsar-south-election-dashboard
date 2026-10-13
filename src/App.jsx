@@ -142,10 +142,10 @@ export default function App() {
         result = result.filter(b => b.data_2026?.leading_party === 'AAP');
       } else if (partyFilter === 'SURVEY_INC_LEADS') {
         result = result.filter(b => b.data_2026?.leading_party === 'INC');
-      } else if (partyFilter === 'SURVEY_BJP_LEADS') {
-        result = result.filter(b => b.data_2026?.leading_party === 'BJP');
+      } else if (partyFilter === 'SURVEY_TIED') {
+        result = result.filter(b => b.data_2026?.leading_party === 'TIED');
       } else if (partyFilter === 'SURVEY_UNDECIDED') {
-        result = result.filter(b => b.data_2026?.leading_party === 'UNDECIDED' || b.data_2026?.other_pct >= 70);
+        result = result.filter(b => b.data_2026?.leading_party === 'UNDECIDED');
       } else if (partyFilter === 'SURVEY_PENDING') {
         result = result.filter(b => !b.data_2026 || b.data_2026?.sample_size === 0);
       }
@@ -218,8 +218,8 @@ export default function App() {
       { value: 'TURNOUT_DESC', label: 'Highest 2024 Turnout' },
       { value: 'MARGIN_DESC', label: 'Highest 2024 Margin' },
       { value: 'SURVEY_SAMPLE_DESC', label: 'Highest 2026 Survey Sample' },
-      { value: 'SURVEY_AAP_DESC', label: 'Highest 2026 AAP Preference' },
-      { value: 'SURVEY_INC_DESC', label: 'Highest 2026 INC Preference' },
+      { value: 'SURVEY_AAP_DESC', label: 'Highest 2026 AAP (Nijjar) Votes' },
+      { value: 'SURVEY_INC_DESC', label: 'Highest 2026 INC (Bolaria) Votes' },
     ];
     if (selectedParty !== 'ALL') {
       opts.push(
@@ -382,7 +382,7 @@ export default function App() {
             </div>
           </section>
 
-          {/* Dsidein 5 Minimal KPI Metric Cards */}
+          {/* Dsidein 4 Minimal KPI Metric Cards */}
           <section className="dsidein-kpi-grid">
             {/* KPI 1: Live Telemetry */}
             <div className="dsidein-kpi-card">
@@ -420,9 +420,9 @@ export default function App() {
                 </div>
               </div>
               <div className="kpi-label">2026 GROUND SURVEY</div>
-              <div className="kpi-value" style={{ color: '#059669' }}>2,159 Sample</div>
+              <div className="kpi-value" style={{ color: '#059669' }}>16,732 Sample</div>
               <div className="kpi-sub-pill" style={{ color: '#059669', background: 'rgba(5, 150, 105, 0.08)' }}>
-                ● 149 Booths | AAP 57.6% vs INC 35.5% Dec.
+                ● 169 Booths | AAP 82 vs INC 83 Leads (35% Und.)
               </div>
             </div>
 
@@ -440,7 +440,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* KPI 5: BJP - 2024 Urban Surge */}
+            {/* KPI 4: BJP - Urban Surge */}
             <div className="dsidein-kpi-card bjp-kpi">
               <div className="kpi-top-row">
                 <div className="kpi-icon-pill icon-orange">
