@@ -6,7 +6,8 @@ export default function BoothGrid({
   selectedParty, 
   onSelectBooth, 
   onExportBoothPdf, 
-  partyFilter 
+  partyFilter,
+  selectedYears = []
 }) {
   const [viewMode, setViewMode] = useState('LIST'); // 'LIST' or 'GRID'
 
@@ -31,7 +32,11 @@ export default function BoothGrid({
         <div className="list-title-wrap">
           <span className="list-count-badge">{booths.length} Booths</span>
           <span className="list-filter-label">
-            {isAllMode && (
+            {selectedYears.length > 0 ? (
+              <span style={{ fontWeight: 700, color: 'var(--accent-primary, #2563eb)' }}>
+                {selectedParty !== 'ALL' ? `${selectedParty} · ` : ''}Won in {selectedYears.map(y => "'" + y.toString().slice(-2)).join(' + ')} ({booths.length} Booths Matching)
+              </span>
+            ) : isAllMode ? (
               partyFilter === 'ALL' ? 'Complete 4-Election Master List (All 169 Booths)' :
               partyFilter === 'CORE_151' ? 'Historical Core Booths 1-151 (100% Retained from 2017 to 2024)' :
               partyFilter === 'AUXILIARY_18' ? 'Auxiliary Booths 152-169 (Added in 2022 Delimitation/Rationalization)' :
@@ -44,8 +49,7 @@ export default function BoothGrid({
               partyFilter === 'BJP_2019_WINS' ? 'Booths Won by BJP in 2019 (33 Booths)' :
               partyFilter === 'FLIPPED_ONLY' ? 'Flipped Booths (2022 vs 2024)' :
               partyFilter === 'RETAINED_ONLY' ? 'Retained Booths (2022 vs 2024)' : 'Booths'
-            )}
-            {!isAllMode && (
+            ) : (
               partyFilter === 'ALL' ? `All 169 Booths for ${selectedParty}` :
               partyFilter === 'WON_BOTH' ? `${selectedParty} Strongholds (Won Both 2022 & 2024)` :
               partyFilter === 'GAINED' ? `${selectedParty} Gains (Won in 2024, Lost in 2022)` :
@@ -153,10 +157,10 @@ export default function BoothGrid({
                         </span>
                       </td>
 
-                      <td>
+                      <td className={selectedYears.includes(2017) ? 'matched-year-cell' : ''}>
                         {d17.exists ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span className={`mini-winner ${w17}`}>{w17}</span>
+                            <span className={`mini-winner ${w17} ${selectedYears.includes(2017) ? 'winner-glow' : ''}`}>{w17}</span>
                             <span className="pct-sub">+{d17.margin}</span>
                           </div>
                         ) : (
@@ -164,10 +168,10 @@ export default function BoothGrid({
                         )}
                       </td>
 
-                      <td>
+                      <td className={selectedYears.includes(2019) ? 'matched-year-cell' : ''}>
                         {d19.exists ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span className={`mini-winner ${w19}`}>{w19}</span>
+                            <span className={`mini-winner ${w19} ${selectedYears.includes(2019) ? 'winner-glow' : ''}`}>{w19}</span>
                             <span className="pct-sub">+{d19.margin}</span>
                           </div>
                         ) : (
@@ -175,16 +179,16 @@ export default function BoothGrid({
                         )}
                       </td>
 
-                      <td>
+                      <td className={selectedYears.includes(2022) ? 'matched-year-cell' : ''}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span className={`mini-winner ${w22}`}>{w22}</span>
+                          <span className={`mini-winner ${w22} ${selectedYears.includes(2022) ? 'winner-glow' : ''}`}>{w22}</span>
                           <span className="pct-sub">+{d22.margin}</span>
                         </div>
                       </td>
 
-                      <td>
+                      <td className={selectedYears.includes(2024) ? 'matched-year-cell' : ''}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span className={`mini-winner ${w24}`}>{w24}</span>
+                          <span className={`mini-winner ${w24} ${selectedYears.includes(2024) ? 'winner-glow' : ''}`}>{w24}</span>
                           <span className="pct-sub">+{d24.margin}</span>
                         </div>
                       </td>
@@ -200,9 +204,16 @@ export default function BoothGrid({
                       </td>
 
                       <td>
-                        <span className="trajectory-table-text" style={{ fontSize: '0.75rem' }}>
-                          {b.trajectory_4_elections}
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                          <span className="trajectory-table-text" style={{ fontSize: '0.75rem' }}>
+                            {b.trajectory_4_elections}
+                          </span>
+                          {selectedYears.length >= 2 && (
+                            <span className="trajectory-match-badge">
+                              ✓ Won {selectedYears.map(y => "'" + y.toString().slice(-2)).join('+')}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       <td style={{ textAlign: 'right', fontWeight: 600 }}>
@@ -362,11 +373,16 @@ export default function BoothGrid({
                 onClick={() => onSelectBooth(b)}
               >
                 <div className="card-top-row">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     <span className="card-booth-badge">#{b.booth_no}</span>
                     <span className={`continuity-pill ${isCore ? 'core' : 'auxiliary'}`}>
                       {isCore ? 'Core 1-151' : 'Auxiliary ’22'}
                     </span>
+                    {selectedYears.length >= 2 && (
+                      <span className="trajectory-match-badge">
+                        ✓ Won in {selectedYears.map(y => "'" + y.toString().slice(-2)).join('+')}
+                      </span>
+                    )}
                   </div>
                   <span className="trajectory-pill-mini">
                     {b.trajectory_4_elections}
@@ -377,33 +393,33 @@ export default function BoothGrid({
                 <div className="card-village-punjabi punjabi-font">{b.polling_station_pa || b.village_punjabi}</div>
 
                 <div className="card-stats-box" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px', fontSize: '0.72rem' }}>
-                  <div className="card-stat-col">
+                  <div className={`card-stat-col ${selectedYears.includes(2017) ? 'matched-col' : ''}`}>
                     <span className="card-stat-label">’17 Win</span>
-                    <span className={`mini-winner ${w17}`} style={{ marginTop: '2px' }}>
+                    <span className={`mini-winner ${w17} ${selectedYears.includes(2017) ? 'winner-glow' : ''}`} style={{ marginTop: '2px' }}>
                       {w17} {d17.margin ? `(+${d17.margin})` : ''}
                     </span>
                     <span className="pct-sub" style={{ margin: '2px 0 0 0' }}>{d17.total || '—'} v</span>
                   </div>
 
-                  <div className="card-stat-col">
+                  <div className={`card-stat-col ${selectedYears.includes(2019) ? 'matched-col' : ''}`}>
                     <span className="card-stat-label">’19 Win</span>
-                    <span className={`mini-winner ${w19}`} style={{ marginTop: '2px' }}>
+                    <span className={`mini-winner ${w19} ${selectedYears.includes(2019) ? 'winner-glow' : ''}`} style={{ marginTop: '2px' }}>
                       {w19} {d19.margin ? `(+${d19.margin})` : ''}
                     </span>
                     <span className="pct-sub" style={{ margin: '2px 0 0 0' }}>{d19.total || '—'} v</span>
                   </div>
 
-                  <div className="card-stat-col">
+                  <div className={`card-stat-col ${selectedYears.includes(2022) ? 'matched-col' : ''}`}>
                     <span className="card-stat-label">’22 Win</span>
-                    <span className={`mini-winner ${w22}`} style={{ marginTop: '2px' }}>
+                    <span className={`mini-winner ${w22} ${selectedYears.includes(2022) ? 'winner-glow' : ''}`} style={{ marginTop: '2px' }}>
                       {w22} (+{d22.margin})
                     </span>
                     <span className="pct-sub" style={{ margin: '2px 0 0 0' }}>{d22.total} v</span>
                   </div>
 
-                  <div className="card-stat-col">
+                  <div className={`card-stat-col ${selectedYears.includes(2024) ? 'matched-col' : ''}`}>
                     <span className="card-stat-label">’24 Win</span>
-                    <span className={`mini-winner ${w24}`} style={{ marginTop: '2px' }}>
+                    <span className={`mini-winner ${w24} ${selectedYears.includes(2024) ? 'winner-glow' : ''}`} style={{ marginTop: '2px' }}>
                       {w24} (+{d24.margin})
                     </span>
                     <span className="pct-sub" style={{ margin: '2px 0 0 0' }}>{d24.total} v</span>

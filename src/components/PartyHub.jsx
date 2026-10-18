@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { 
   Layers, 
   ShieldCheck, 
@@ -10,7 +10,9 @@ import {
   Filter, 
   Flame, 
   ArrowRight,
-  Building2
+  Building2,
+  Sparkles,
+  History
 } from 'lucide-react';
 
 export default function PartyHub({ 
@@ -19,7 +21,10 @@ export default function PartyHub({
   partyFilter, 
   setPartyFilter,
   partyStats,
-  summary
+  summary,
+  booths = [],
+  selectedYears = [],
+  setSelectedYears
 }) {
   const currentStats = partyStats[selectedParty] || partyStats.AAP;
   const totalBooths = summary?.total_booths || 169;
@@ -94,6 +99,58 @@ export default function PartyHub({
   };
 
   const currLineage = lineage[selectedParty] || lineage.AAP;
+
+  // Calculate booth count for any set of election years
+  const getComboCount = (comboYears) => {
+    return booths.filter(b => {
+      if (selectedParty !== 'ALL') {
+        return comboYears.every(yr => (b[`data_${yr}`]?.winner_party === selectedParty));
+      } else {
+        const winners = comboYears.map(yr => b[`data_${yr}`]?.winner_party).filter(Boolean);
+        return winners.length === comboYears.length && winners.every(w => w === winners[0]);
+      }
+    }).length;
+  };
+
+  // Pre-calculated combinations (including the requested '17+'19+'24)
+  const comboPills = useMemo(() => [
+    { id: '17_19_24', years: [2017, 2019, 2024], label: "Won ’17+’19+’24", isPrimary: true },
+    { id: '17_19_22', years: [2017, 2019, 2022], label: "Won ’17+’19+’22" },
+    { id: '17_22_24', years: [2017, 2022, 2024], label: "Won ’17+’22+’24" },
+    { id: '19_22_24', years: [2019, 2022, 2024], label: "Won ’19+’22+’24" },
+    { id: '17_19', years: [2017, 2019], label: "Won ’17+’19" },
+    { id: '19_24', years: [2019, 2024], label: "Won ’19+’24" },
+    { id: '17_24', years: [2017, 2024], label: "Won ’17+’24" },
+    { id: '22_24', years: [2022, 2024], label: "Won ’22+’24" },
+    { id: 'ALL_4', years: [2017, 2019, 2022, 2024], label: "👑 All 4 (’17+’19+’22+’24)" }
+  ].map(item => ({
+    ...item,
+    count: getComboCount(item.years)
+  })), [booths, selectedParty]);
+
+  const handleToggleYear = (year) => {
+    if (!setSelectedYears) return;
+    const exists = selectedYears.includes(year);
+    let next;
+    if (exists) {
+      next = selectedYears.filter(y => y !== year);
+    } else {
+      next = [...selectedYears, year].sort((a, b) => a - b);
+    }
+    setSelectedYears(next);
+  };
+
+  const handleSelectCombo = (comboYears) => {
+    if (!setSelectedYears) return;
+    const isCurrentlyActive = selectedYears.length === comboYears.length && 
+      comboYears.every(y => selectedYears.includes(y));
+    
+    if (isCurrentlyActive) {
+      setSelectedYears([]);
+    } else {
+      setSelectedYears([...comboYears].sort((a, b) => a - b));
+    }
+  };
 
   return (
     <div id="party-analytics-hub" className="registry-sub-controls" aria-label="Party Analytics and Filters">
@@ -246,7 +303,83 @@ export default function PartyHub({
         </div>
       )}
 
-      {/* 2. Category Filter Pills */}
+      {/* 2. Multi-Election Trajectory & Continuity Combination Hub */}
+      <div className="multi-year-trajectory-box">
+        <div className="trajectory-box-header">
+          <div className="trajectory-title-wrap">
+            <span className="trajectory-badge">MULTI-YEAR COMBINATIONS</span>
+            <span className="trajectory-title">ELECTION TRAJECTORY & CONTINUITY FILTERS</span>
+            <span className="trajectory-hint">
+              Check booths won across combinations (e.g. <strong>Won in ’17+’19+’24</strong>, <strong>’17+’19</strong>, <strong>’19+’24</strong>)
+            </span>
+          </div>
+
+          {selectedYears.length > 0 && (
+            <button 
+              type="button"
+              className="btn-clear-combo"
+              onClick={() => setSelectedYears([])}
+              title="Reset multi-year filter"
+            >
+              <span>Clear Filter ({selectedYears.map(y => "'" + y.toString().slice(-2)).join('+')})</span>
+            </button>
+          )}
+        </div>
+
+        {/* Dynamic Year Builder Strip & Quick Presets */}
+        <div className="trajectory-controls-row">
+          <div className="year-builder-group">
+            <span className="builder-label">CUSTOM BUILDER:</span>
+            <div className="year-toggle-strip">
+              {[
+                { year: 2017, code: '’17 VS' },
+                { year: 2019, code: '’19 LS' },
+                { year: 2022, code: '’22 VS' },
+                { year: 2024, code: '’24 LS' }
+              ].map(({ year, code }) => {
+                const isActive = selectedYears.includes(year);
+                return (
+                  <button
+                    key={year}
+                    type="button"
+                    className={`year-toggle-btn ${isActive ? 'active' : ''}`}
+                    onClick={() => handleToggleYear(year)}
+                    title={`Toggle ${year} in trajectory filter`}
+                  >
+                    <span className="year-toggle-check">{isActive ? '✓' : '+'}</span>
+                    <span className="year-toggle-text">{code}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quick Combinations Row */}
+          <div className="quick-combos-group">
+            <span className="builder-label">QUICK COMBINATIONS:</span>
+            <div className="quick-combos-pills">
+              {comboPills.map(combo => {
+                const isActive = selectedYears.length === combo.years.length && 
+                  combo.years.every(y => selectedYears.includes(y));
+                return (
+                  <button
+                    key={combo.id}
+                    type="button"
+                    className={`quick-combo-btn ${isActive ? 'active' : ''} ${combo.isPrimary ? 'featured-combo' : ''}`}
+                    onClick={() => handleSelectCombo(combo.years)}
+                    title={`Filter booths won in ${combo.label}`}
+                  >
+                    <span className="combo-btn-label">{combo.label}</span>
+                    <span className="combo-btn-count">{combo.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Category Filter Pills */}
       <div className={`category-filter-pills ${selectedParty.toLowerCase()}-mode`}>
         <div className="filter-pill-header">
           <Filter size={12} className="filter-header-icon" />
