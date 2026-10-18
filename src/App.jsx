@@ -62,6 +62,7 @@ export default function App() {
     }
   };
 
+
   const { summary, booths } = electionData;
 
   // Dynamic stats calculation for all parties directly from verified data
@@ -90,9 +91,37 @@ export default function App() {
         share_2024: s24,
         vote_diff: diff,
         swing: swing,
-        booths_won_2022: summary?.booths_won_2022?.[pCode] || 0,
-        booths_won_2024: summary?.booths_won_2024?.[pCode] || 0,
+        booths_won_2017: summary?.booths_won_2017?.[pCode] || booths.filter(b => b.data_2017?.winner_party === pCode).length,
+        booths_won_2019: summary?.booths_won_2019?.[pCode] || booths.filter(b => b.data_2019?.winner_party === pCode).length,
+        booths_won_2022: summary?.booths_won_2022?.[pCode] || booths.filter(b => b.data_2022?.winner_party === pCode).length,
+        booths_won_2024: summary?.booths_won_2024?.[pCode] || booths.filter(b => b.data_2024?.winner_party === pCode).length,
+        won_this_year_count: booths.filter(b => b.data_2024?.winner_party === pCode).length,
         won_both_count: booths.filter(b => b.categories?.[pCode] === 'WON_BOTH').length,
+        won_in_2_count: booths.filter(b => {
+          let c = 0;
+          if (b.data_2017?.winner_party === pCode) c++;
+          if (b.data_2019?.winner_party === pCode) c++;
+          if (b.data_2022?.winner_party === pCode) c++;
+          if (b.data_2024?.winner_party === pCode) c++;
+          return c === 2;
+        }).length,
+        won_in_3_count: booths.filter(b => {
+          let c = 0;
+          if (b.data_2017?.winner_party === pCode) c++;
+          if (b.data_2019?.winner_party === pCode) c++;
+          if (b.data_2022?.winner_party === pCode) c++;
+          if (b.data_2024?.winner_party === pCode) c++;
+          return c === 3;
+        }).length,
+        won_all_count: booths.filter(b => {
+          let c = 0;
+          if (b.data_2017?.winner_party === pCode) c++;
+          if (b.data_2019?.winner_party === pCode) c++;
+          if (b.data_2022?.winner_party === pCode) c++;
+          if (b.data_2024?.winner_party === pCode) c++;
+          const tot = b.data_2017 ? 4 : 2;
+          return c === tot;
+        }).length,
         gained_count: booths.filter(b => b.categories?.[pCode] === 'GAINED').length,
         lost_24_count: booths.filter(b => b.categories?.[pCode] === 'LOST_24').length,
         weak_count: booths.filter(b => b.categories?.[pCode] === 'WEAK').length,
@@ -137,22 +166,72 @@ export default function App() {
         result = result.filter(b => b.booth_no <= 151);
       } else if (partyFilter === 'AUXILIARY_18') {
         result = result.filter(b => b.booth_no > 151);
-      } else if (partyFilter === 'INC_WINS') {
-        result = result.filter(b => b.data_2024.winner_party === 'INC');
-      } else if (partyFilter === 'AAP_WINS') {
-        result = result.filter(b => b.data_2024.winner_party === 'AAP');
-      } else if (partyFilter === 'BJP_WINS') {
-        result = result.filter(b => b.data_2024.winner_party === 'BJP');
-      } else if (partyFilter === 'SAD_WINS') {
-        result = result.filter(b => b.data_2024.winner_party === 'SAD');
-      } else if (partyFilter === 'INC_2017_WINS') {
-        result = result.filter(b => b.data_2017?.winner_party === 'INC');
-      } else if (partyFilter === 'AAP_2017_WINS') {
-        result = result.filter(b => b.data_2017?.winner_party === 'AAP');
+      } else if (partyFilter === 'INC_WINS' || partyFilter === 'INC_2024_WINS') {
+        result = result.filter(b => b.data_2024?.winner_party === 'INC');
+      } else if (partyFilter === 'AAP_WINS' || partyFilter === 'AAP_2024_WINS') {
+        result = result.filter(b => b.data_2024?.winner_party === 'AAP');
+      } else if (partyFilter === 'BJP_WINS' || partyFilter === 'BJP_2024_WINS') {
+        result = result.filter(b => b.data_2024?.winner_party === 'BJP');
+      } else if (partyFilter === 'SAD_WINS' || partyFilter === 'SAD_2024_WINS') {
+        result = result.filter(b => b.data_2024?.winner_party === 'SAD');
+      } else if (partyFilter === 'AAP_2022_WINS') {
+        result = result.filter(b => b.data_2022?.winner_party === 'AAP');
+      } else if (partyFilter === 'SAD_2022_WINS') {
+        result = result.filter(b => b.data_2022?.winner_party === 'SAD');
+      } else if (partyFilter === 'INC_2022_WINS') {
+        result = result.filter(b => b.data_2022?.winner_party === 'INC');
       } else if (partyFilter === 'INC_2019_WINS') {
         result = result.filter(b => b.data_2019?.winner_party === 'INC');
       } else if (partyFilter === 'BJP_2019_WINS') {
         result = result.filter(b => b.data_2019?.winner_party === 'BJP');
+      } else if (partyFilter === 'INC_2017_WINS') {
+        result = result.filter(b => b.data_2017?.winner_party === 'INC');
+      } else if (partyFilter === 'AAP_2017_WINS') {
+        result = result.filter(b => b.data_2017?.winner_party === 'AAP');
+      } else if (partyFilter === 'SAD_2017_WINS') {
+        result = result.filter(b => b.data_2017?.winner_party === 'SAD');
+      } else if (partyFilter === 'WON_THIS_YEAR') {
+        result = result.filter(b => Boolean(b.data_2024?.winner_party));
+      } else if (partyFilter === 'WON_IN_2') {
+        result = result.filter(b => {
+          const w24 = b.data_2024?.winner_party;
+          if (!w24) return false;
+          let count = 0;
+          if (b.data_2017?.winner_party === w24) count++;
+          if (b.data_2019?.winner_party === w24) count++;
+          if (b.data_2022?.winner_party === w24) count++;
+          if (b.data_2024?.winner_party === w24) count++;
+          return count === 2;
+        });
+      } else if (partyFilter === 'WON_IN_3_PLUS') {
+        result = result.filter(b => {
+          const w24 = b.data_2024?.winner_party;
+          if (!w24) return false;
+          let count = 0;
+          if (b.data_2017?.winner_party === w24) count++;
+          if (b.data_2019?.winner_party === w24) count++;
+          if (b.data_2022?.winner_party === w24) count++;
+          if (b.data_2024?.winner_party === w24) count++;
+          return count >= 3;
+        });
+      } else if (partyFilter === 'WON_ALL_ELECTIONS') {
+        result = result.filter(b => {
+          const w24 = b.data_2024?.winner_party;
+          if (!w24) return false;
+          const totalAvail = b.data_2017 ? 4 : 2;
+          let count = 0;
+          if (b.data_2017?.winner_party === w24) count++;
+          if (b.data_2019?.winner_party === w24) count++;
+          if (b.data_2022?.winner_party === w24) count++;
+          if (b.data_2024?.winner_party === w24) count++;
+          return count === totalAvail;
+        });
+      } else if (partyFilter === 'WON_2024_ONLY') {
+        result = result.filter(b => {
+          const w24 = b.data_2024?.winner_party;
+          if (!w24) return false;
+          return b.data_2022?.winner_party !== w24 && b.data_2019?.winner_party !== w24 && b.data_2017?.winner_party !== w24;
+        });
       } else if (partyFilter === 'FLIPPED_ONLY') {
         result = result.filter(b => b.comparison.is_flip);
       } else if (partyFilter === 'RETAINED_ONLY') {
@@ -161,26 +240,60 @@ export default function App() {
     } else {
       // Party-specific mode (AAP, INC, SAD, BJP)
       const pKey = selectedParty.toLowerCase();
+      const p = selectedParty;
       if (partyFilter !== 'ALL') {
         result = result.filter(b => {
-          const w22 = b.data_2022.winner_party;
-          const w24 = b.data_2024.winner_party;
+          const w17 = b.data_2017?.winner_party;
+          const w19 = b.data_2019?.winner_party;
+          const w22 = b.data_2022?.winner_party;
+          const w24 = b.data_2024?.winner_party;
           const pct24 = b.data_2024[`${pKey}_pct`] || 0;
 
+          let pWins = 0;
+          if (w17 === p) pWins++;
+          if (w19 === p) pWins++;
+          if (w22 === p) pWins++;
+          if (w24 === p) pWins++;
+
+          if (partyFilter === 'WON_THIS_YEAR' || partyFilter === 'WON_24') {
+            return w24 === p;
+          }
+          if (partyFilter === 'WON_22') {
+            return w22 === p;
+          }
+          if (partyFilter === 'WON_19') {
+            return w19 === p;
+          }
+          if (partyFilter === 'WON_17') {
+            return w17 === p;
+          }
           if (partyFilter === 'WON_BOTH') {
-            return w22 === selectedParty && w24 === selectedParty;
+            return w22 === p && w24 === p;
+          }
+          if (partyFilter === 'WON_IN_2') {
+            return pWins === 2;
+          }
+          if (partyFilter === 'WON_IN_3_PLUS') {
+            return pWins >= 3;
+          }
+          if (partyFilter === 'WON_ALL_ELECTIONS') {
+            const totalAvail = b.data_2017 ? 4 : 2;
+            return pWins === totalAvail;
+          }
+          if (partyFilter === 'WON_2024_ONLY') {
+            return w24 === p && w22 !== p && w19 !== p && w17 !== p;
           }
           if (partyFilter === 'GAINED') {
-            return w22 !== selectedParty && w24 === selectedParty;
+            return w22 !== p && w24 === p;
           }
           if (partyFilter === 'LOST_24') {
-            return w22 === selectedParty && w24 !== selectedParty;
+            return w22 === p && w24 !== p;
           }
           if (partyFilter === 'WEAK') {
             return pct24 < 20.0 && b.data_2024.total > 0;
           }
           if (partyFilter === 'LOST_BOTH') {
-            return w22 !== selectedParty && w24 !== selectedParty;
+            return w22 !== p && w24 !== p;
           }
           return true;
         });
@@ -234,6 +347,33 @@ export default function App() {
     setPartyFilter('ALL');
     setSearchQuery('');
     setSortBy('BOOTH_ASC');
+  };
+
+  // 1-Click Telemetry Filter: Click from KPI Card to Party Hub & Booths
+  const handleFilterByYearParty = (year, party) => {
+    if (activeTab !== 'BOOTHS') {
+      setActiveTab('BOOTHS');
+    }
+
+    const targetFilter = year === 2024 ? 'WON_24' : year === 2022 ? 'WON_22' : year === 2019 ? 'WON_19' : 'WON_17';
+
+    // If already active, toggle off to complete view
+    if (selectedParty === party && (partyFilter === targetFilter || (year === 2024 && partyFilter === 'WON_THIS_YEAR'))) {
+      setSelectedParty('ALL');
+      setPartyFilter('ALL');
+      return;
+    }
+
+    setSelectedParty(party);
+    setPartyFilter(targetFilter);
+
+    // Smooth scroll down to party hub / table
+    setTimeout(() => {
+      const el = document.getElementById('party-analytics-hub') || document.getElementById('booth-performance-registry');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 60);
   };
 
   // Export Single Booth to PDF
@@ -380,8 +520,13 @@ export default function App() {
             </div>
           </section>
 
-          {/* 4-Election Historical KPI Highlights */}
-          <KPIBanner summary={summary} />
+          {/* 4-Election Historical KPI Highlights with 1-Click Telemetry */}
+          <KPIBanner 
+            summary={summary} 
+            onFilterByYearParty={handleFilterByYearParty}
+            selectedParty={selectedParty}
+            activeFilter={partyFilter}
+          />
 
           {/* Conditional View: Audit & Trends Tab vs Dashboard Tab */}
           {activeTab === 'ANALYTICS' && (
@@ -395,7 +540,7 @@ export default function App() {
           )}
 
           {/* Unified Registry Card */}
-          <section className="dsidein-registry-card">
+          <section id="booth-performance-registry" className="dsidein-registry-card">
             {/* Card Top Title Row */}
             <div className="registry-card-header">
               <div className="registry-title-group">
@@ -429,6 +574,54 @@ export default function App() {
               partyStats={partyStats}
               summary={summary}
             />
+
+            {/* Active Filter Notification Banner */}
+            {(partyFilter !== 'ALL' || selectedParty !== 'ALL') && (
+              <div className="active-filter-banner" style={{
+                margin: '0 24px 12px 24px',
+                padding: '8px 14px',
+                background: 'var(--bg-surface-elevated, #f1f5f9)',
+                border: '1px solid var(--border-medium, #cbd5e1)',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '0.8125rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Active Telemetry Filter:</span>
+                  <span style={{
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    background: selectedParty === 'INC' ? 'var(--color-inc-soft)' : selectedParty === 'AAP' ? 'var(--color-aap-soft)' : selectedParty === 'BJP' ? 'var(--color-bjp-soft)' : 'var(--border-subtle)',
+                    color: selectedParty === 'INC' ? 'var(--color-inc)' : selectedParty === 'AAP' ? 'var(--color-aap)' : selectedParty === 'BJP' ? 'var(--color-bjp)' : 'var(--text-primary)'
+                  }}>
+                    {selectedParty !== 'ALL' ? `${selectedParty} · ` : ''}{partyFilter.replace(/_/g, ' ')} ({filteredBooths.length} Booths)
+                  </span>
+                </div>
+                <button
+                  onClick={handleResetToCompleteList}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title="Clear active filter"
+                >
+                  <RotateCcw size={12} />
+                  <span>Clear Filter</span>
+                </button>
+              </div>
+            )}
 
             {/* Search & Sort Sub-Toolbar */}
             <div className="registry-toolbar">
