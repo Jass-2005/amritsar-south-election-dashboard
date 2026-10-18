@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, ArrowDownRight, Minus, ChevronRight } from 'lucide-react';
+import { ChevronRight, Printer } from 'lucide-react';
 
 export default function BoothTable({ booths, onSelectBooth }) {
   if (booths.length === 0) {
@@ -16,28 +16,35 @@ export default function BoothTable({ booths, onSelectBooth }) {
       <table className="booth-table">
         <thead>
           <tr>
-            <th style={{ width: '70px', textAlign: 'center' }}>Booth</th>
-            <th>Village / Polling Station</th>
-            <th>2022 Assembly Result</th>
-            <th>2024 Lok Sabha Result</th>
-            <th>Shift / Status</th>
-            <th style={{ textAlign: 'right' }}>Turnout Trend</th>
+            <th style={{ width: '60px', textAlign: 'center' }}>Booth</th>
+            <th>Polling Station / Location</th>
+            <th>Continuity</th>
+            <th>2017 Assembly</th>
+            <th>2019 Lok Sabha</th>
+            <th>2022 Assembly</th>
+            <th>2024 Lok Sabha</th>
+            <th>4-Election Trajectory</th>
             <th style={{ width: '40px' }}></th>
           </tr>
         </thead>
         <tbody>
           {booths.map((b) => {
-            const w22 = b.data_2022.winner_party;
-            const w24 = b.data_2024.winner_party;
-            const diff = b.comparison.turnout_diff;
-            const pct = b.comparison.turnout_pct;
-            const isFlipped = b.comparison.is_flip;
+            const isCore = b.booth_no <= 151;
+            const d17 = b.data_2017 || {};
+            const d19 = b.data_2019 || {};
+            const d22 = b.data_2022 || {};
+            const d24 = b.data_2024 || {};
+
+            const w17 = d17.exists ? d17.winner_party : '—';
+            const w19 = d19.exists ? d19.winner_party : '—';
+            const w22 = d22.winner_party || '—';
+            const w24 = d24.winner_party || '—';
 
             return (
               <tr 
                 key={b.booth_no} 
                 onClick={() => onSelectBooth(b)} 
-                title={`Click to inspect detailed breakdown for Booth #${b.booth_no}`}
+                title={`Click to inspect 4-Election Dossier for Booth #${b.booth_no}`}
               >
                 {/* Booth No */}
                 <td style={{ textAlign: 'center', fontWeight: 700, color: 'var(--text-secondary)' }}>
@@ -47,67 +54,77 @@ export default function BoothTable({ booths, onSelectBooth }) {
                 {/* Village / Polling Station */}
                 <td>
                   <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {b.village_english}
+                    {b.polling_station_en || b.village_english}
                   </div>
                   <div className="punjabi-text" style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                    {b.village_punjabi}
+                    {b.polling_station_pa || b.village_punjabi}
                   </div>
+                </td>
+
+                {/* Continuity */}
+                <td>
+                  <span className={`continuity-pill ${isCore ? 'core' : 'auxiliary'}`}>
+                    {isCore ? 'Core 1-151' : 'Auxiliary ’22'}
+                  </span>
+                </td>
+
+                {/* 2017 Result */}
+                <td>
+                  {d17.exists ? (
+                    <div>
+                      <span className={`badge-winner ${w17}`}>{w17}</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+                        +{d17.margin}
+                      </span>
+                    </div>
+                  ) : (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>—</span>
+                  )}
+                </td>
+
+                {/* 2019 Result */}
+                <td>
+                  {d19.exists ? (
+                    <div>
+                      <span className={`badge-winner ${w19}`}>{w19}</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+                        +{d19.margin}
+                      </span>
+                    </div>
+                  ) : (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>—</span>
+                  )}
                 </td>
 
                 {/* 2022 Result */}
                 <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-                    <span className={`badge-winner ${w22}`}>
-                      {w22}
+                  <div>
+                    <span className={`badge-winner ${w22}`}>{w22}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+                      +{d22.margin}
                     </span>
-                    <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                      +{b.data_2022.margin} lead
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    INC {b.data_2022.inc} | AAP {b.data_2022.aap} | SAD {b.data_2022.sad}
                   </div>
                 </td>
 
                 {/* 2024 Result */}
                 <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-                    <span className={`badge-winner ${w24}`}>
-                      {w24}
+                  <div>
+                    <span className={`badge-winner ${w24}`}>{w24}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+                      +{d24.margin}
                     </span>
-                    <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                      +{b.data_2024.margin} lead
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    INC {b.data_2024.inc} | AAP {b.data_2024.aap} | BJP {b.data_2024.bjp} | SAD {b.data_2024.sad}
                   </div>
                 </td>
 
-                {/* Status Badge */}
+                {/* Trajectory */}
                 <td>
-                  <span className={`status-badge ${isFlipped ? 'flipped' : 'retained'}`}>
-                    {b.comparison.status_label}
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    {b.trajectory_4_elections}
                   </span>
                 </td>
 
-                {/* Turnout Trend */}
-                <td style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: 600 }}>
-                    {b.data_2024.total.toLocaleString()}
-                  </div>
-                  <div 
-                    className={`turnout-indicator ${diff > 0 ? 'gain' : (diff < 0 ? 'drop' : '')}`}
-                    style={{ justifyContent: 'flex-end' }}
-                  >
-                    {diff > 0 ? <ArrowUpRight size={14} /> : (diff < 0 ? <ArrowDownRight size={14} /> : <Minus size={14} />)}
-                    <span>{diff > 0 ? `+${diff}` : diff} ({pct}%)</span>
-                  </div>
-                </td>
-
-                {/* Arrow */}
-                <td style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                  <ChevronRight size={16} />
+                <td style={{ textAlign: 'center' }}>
+                  <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
                 </td>
               </tr>
             );

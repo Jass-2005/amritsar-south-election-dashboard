@@ -7,9 +7,10 @@ import {
   AlertTriangle, 
   ShieldAlert, 
   Award, 
-  Filter,
-  Flame,
-  ArrowRight
+  Filter, 
+  Flame, 
+  ArrowRight,
+  Building2
 } from 'lucide-react';
 
 export default function PartyHub({ 
@@ -22,15 +23,77 @@ export default function PartyHub({
 }) {
   const currentStats = partyStats[selectedParty] || partyStats.AAP;
   const totalBooths = summary?.total_booths || 169;
-  const aapWins = summary?.booths_won_2024?.AAP || 102;
-  const bjpWins = summary?.booths_won_2024?.BJP || 35;
-  const incWins = summary?.booths_won_2024?.INC || 32;
+  const aapWins = summary?.booths_won_2024?.AAP || 84;
+  const bjpWins = summary?.booths_won_2024?.BJP || 43;
+  const incWins = summary?.booths_won_2024?.INC || 42;
   const sadWins = summary?.booths_won_2024?.SAD || 0;
   const m26 = summary?.metrics_2026_survey || {};
 
   // Retained & Flipped counts
-  const retainedCount = 107; // AAP 99 + INC 8
-  const flippedCount = 62;
+  const retainedCount = 82;
+  const flippedCount = 87;
+
+  // 4-Election lineage metadata
+  const lineage = {
+    AAP: {
+      c17: 'Dr. Inderbir Singh Nijjar',
+      v17: summary?.party_votes_2017?.AAP || 24842,
+      s17: '26.7%',
+      c19: 'Kuldip Singh Dhaliwal',
+      v19: summary?.party_votes_2019?.AAP || 2544,
+      s19: '3.3%',
+      c22: 'Dr. Inderbir Singh Nijjar',
+      v22: summary?.party_votes_2022?.AAP || 53053,
+      s22: '50.1%',
+      c24: 'Kuldeep Singh Dhaliwal',
+      v24: summary?.party_votes_2024?.AAP || 28431,
+      s24: '34.4%'
+    },
+    INC: {
+      c17: 'Inderbir Singh Bolaria',
+      v17: summary?.party_votes_2017?.INC || 47517,
+      s17: '51.0%',
+      c19: 'Gurjeet Singh Aujla',
+      v19: summary?.party_votes_2019?.INC || 40489,
+      s19: '52.5%',
+      c22: 'Inderbir Singh Bolaria',
+      v22: summary?.party_votes_2022?.INC || 22467,
+      s22: '21.2%',
+      c24: 'Gurjeet Singh Aujla',
+      v24: summary?.party_votes_2024?.INC || 21782,
+      s24: '26.3%'
+    },
+    BJP: {
+      c17: 'SAD-BJP Alliance',
+      v17: 'Alliance',
+      s17: '—',
+      c19: 'Hardeep Singh Puri',
+      v19: summary?.party_votes_2019?.BJP || 30094,
+      s19: '39.0%',
+      c22: 'Harjinder Thekedar (PLC/BJP)',
+      v22: 1566,
+      s22: '1.5%',
+      c24: 'Taranjit Singh Sandhu',
+      v24: summary?.party_votes_2024?.BJP || 15819,
+      s24: '19.1%'
+    },
+    SAD: {
+      c17: 'Gurpartap Singh Tikka',
+      v17: summary?.party_votes_2017?.SAD || 16569,
+      s17: '17.8%',
+      c19: 'SAD-BJP Alliance',
+      v19: 'Alliance',
+      s19: '—',
+      c22: 'Talbir Singh Gill',
+      v22: summary?.party_votes_2022?.SAD || 25550,
+      s22: '24.1%',
+      c24: 'Anil Joshi',
+      v24: summary?.party_votes_2024?.SAD || 10932,
+      s24: '13.2%'
+    }
+  };
+
+  const currLineage = lineage[selectedParty] || lineage.AAP;
 
   return (
     <div className="registry-sub-controls" aria-label="Party Analytics and Filters">
@@ -52,40 +115,40 @@ export default function PartyHub({
           <button
             className={`party-tab-pill ${selectedParty === 'AAP' ? 'active aap' : ''}`}
             onClick={() => { setSelectedParty('AAP'); setPartyFilter('ALL'); }}
-            title="Aam Aadmi Party: Dr. Inderbir Singh Nijjar ('22) -> Kuldeep Singh Dhaliwal ('24)"
+            title="Aam Aadmi Party 4-Election Analytics"
           >
             <span className="party-color-indicator aap-indicator"></span>
             <span className="party-tab-text">AAP Analytics</span>
             <span className="tab-pill-count aap-badge">{aapWins} Wins</span>
           </button>
 
-          {/* BJP Analytics Button */}
-          <button
-            className={`party-tab-pill ${selectedParty === 'BJP' ? 'active bjp' : ''}`}
-            onClick={() => { setSelectedParty('BJP'); setPartyFilter('ALL'); }}
-            title="Bharatiya Janata Party: Harjinder Thekedar ('22) -> Taranjit Singh Sandhu Samundri ('24)"
-          >
-            <span className="party-color-indicator bjp-indicator"></span>
-            <span className="party-tab-text">BJP Analytics</span>
-            <span className="tab-pill-count bjp-badge">{bjpWins} Wins</span>
-          </button>
-
           {/* INC Analytics Button */}
           <button
             className={`party-tab-pill ${selectedParty === 'INC' ? 'active inc' : ''}`}
             onClick={() => { setSelectedParty('INC'); setPartyFilter('ALL'); }}
-            title="Congress (INC): Inderbir Singh Bolaria ('22) -> Gurjeet Singh Aujla ('24)"
+            title="Congress (INC) 4-Election Analytics"
           >
             <span className="party-color-indicator inc-indicator"></span>
             <span className="party-tab-text">INC Analytics</span>
             <span className="tab-pill-count inc-badge">{incWins} Wins</span>
           </button>
 
+          {/* BJP Analytics Button */}
+          <button
+            className={`party-tab-pill ${selectedParty === 'BJP' ? 'active bjp' : ''}`}
+            onClick={() => { setSelectedParty('BJP'); setPartyFilter('ALL'); }}
+            title="Bharatiya Janata Party 4-Election Analytics"
+          >
+            <span className="party-color-indicator bjp-indicator"></span>
+            <span className="party-tab-text">BJP Analytics</span>
+            <span className="tab-pill-count bjp-badge">{bjpWins} Wins</span>
+          </button>
+
           {/* SAD Analytics Button */}
           <button
             className={`party-tab-pill ${selectedParty === 'SAD' ? 'active sad' : ''}`}
             onClick={() => { setSelectedParty('SAD'); setPartyFilter('ALL'); }}
-            title="Shiromani Akali Dal: Talbir Singh Gill ('22) -> Anil Joshi ('24)"
+            title="Shiromani Akali Dal 4-Election Analytics"
           >
             <span className="party-color-indicator sad-indicator"></span>
             <span className="party-tab-text">SAD Analytics</span>
@@ -98,94 +161,86 @@ export default function PartyHub({
           {selectedParty === 'ALL' ? (
             <>
               <div className="vital-item">
-                <span className="vital-lbl">Turnout</span>
-                <span className="vital-val">{summary?.total_votes_2024?.toLocaleString() || '82,725'}</span>
-                <span className="vital-sub">Form-20 EVM Verified</span>
+                <span className="vital-lbl">Core (1-151)</span>
+                <span className="vital-val">151 Booths</span>
+                <span className="vital-sub">100% Retained</span>
               </div>
               <span className="vital-divider" aria-hidden="true" />
-              <div className="vital-item lead-aap">
-                <span className="vital-lbl">AAP Lead</span>
-                <span className="vital-val">+6,649</span>
-                <span className="vital-sub">over INC</span>
+              <div className="vital-item">
+                <span className="vital-lbl">Aux (152-169)</span>
+                <span className="vital-val">+18 Booths</span>
+                <span className="vital-sub">Created ’22</span>
               </div>
               <span className="vital-divider hide-mobile" aria-hidden="true" />
               <div className="vital-item hide-mobile">
-                <span className="vital-lbl">’26 Survey</span>
-                <span className="vital-val" style={{ color: 'var(--color-gain)' }}>16,732 Sample</span>
-                <span className="vital-sub">AAP 82 · INC 83 Leads (35% Und.)</span>
+                <span className="vital-lbl">’24 Turnout</span>
+                <span className="vital-val">82,725</span>
+                <span className="vital-sub">AAP +6.6k Lead</span>
               </div>
             </>
           ) : (
             <>
               <div className="vital-item">
+                <span className="vital-lbl">’17 Votes</span>
+                <span className="vital-val">{currLineage.v17.toLocaleString()}</span>
+                <span className="vital-sub">({currLineage.s17})</span>
+              </div>
+              <span className="vital-divider" aria-hidden="true" />
+              <div className="vital-item">
+                <span className="vital-lbl">’19 Votes</span>
+                <span className="vital-val">{currLineage.v19.toLocaleString()}</span>
+                <span className="vital-sub">({currLineage.s19})</span>
+              </div>
+              <span className="vital-divider" aria-hidden="true" />
+              <div className="vital-item">
                 <span className="vital-lbl">’22 Votes</span>
-                <span className="vital-val">{currentStats.votes_2022.toLocaleString()}</span>
-                <span className="vital-sub">({currentStats.share_2022}%)</span>
-              </div>
-              <span className="vital-divider" aria-hidden="true" />
-              <div className="vital-item">
-                <span className="vital-lbl">’24 Votes</span>
-                <span className="vital-val">{currentStats.votes_2024.toLocaleString()}</span>
-                <span className="vital-sub">({currentStats.share_2024}%)</span>
-              </div>
-              <span className="vital-divider" aria-hidden="true" />
-              <div className="vital-item">
-                <span className="vital-lbl">’26 Survey</span>
-                <span className="vital-val" style={{ color: 'var(--color-gain)' }}>
-                  {m26.party_shares_decided?.[selectedParty] || 0}% Dec.
-                </span>
-                <span className="vital-sub">
-                  ({m26.booths_led?.[selectedParty] || 0} booth leads)
-                </span>
+                <span className="vital-val">{currLineage.v22.toLocaleString()}</span>
+                <span className="vital-sub">({currLineage.s22})</span>
               </div>
               <span className="vital-divider hide-mobile" aria-hidden="true" />
               <div className="vital-item hide-mobile">
-                <span className="vital-lbl">Booths</span>
-                <span className="vital-val">{currentStats.booths_won_2022} → {currentStats.booths_won_2024}</span>
-                <span className="vital-sub">
-                  ({currentStats.booths_won_2024 - currentStats.booths_won_2022 >= 0 ? `+${currentStats.booths_won_2024 - currentStats.booths_won_2022}` : currentStats.booths_won_2024 - currentStats.booths_won_2022})
-                </span>
+                <span className="vital-lbl">’24 Votes</span>
+                <span className="vital-val">{currLineage.v24.toLocaleString()}</span>
+                <span className="vital-sub">({currLineage.s24})</span>
               </div>
             </>
           )}
         </div>
       </div>
 
-      {/* Candidate Attribution Strip when a Party is Selected */}
+      {/* 4-Election Candidate Lineage Bar when a Party is Selected */}
       {selectedParty !== 'ALL' && (
         <div className="party-candidate-bar" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '8px 16px',
+          padding: '10px 16px',
           background: 'var(--bg-surface-elevated, #f8fafc)',
           borderRadius: '8px',
           margin: '8px 0',
           border: '1px solid var(--border-subtle, #e2e8f0)',
-          fontSize: '0.8125rem'
+          fontSize: '0.8rem',
+          flexWrap: 'wrap',
+          gap: '8px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-              {selectedParty} Leadership:
+              {selectedParty} 10-Year Candidate History:
             </span>
             <span>
-              <strong>2022 Candidate:</strong> {currentStats.candidate_2022} ({currentStats.votes_2022.toLocaleString()} votes)
+              <strong>’17:</strong> {currLineage.c17} ({currLineage.v17.toLocaleString()})
             </span>
-            <ArrowRight size={14} style={{ color: 'var(--text-muted)' }} />
+            <ArrowRight size={12} style={{ color: 'var(--text-muted)' }} />
             <span>
-              <strong>2024 Candidate:</strong> {currentStats.candidate_2024} ({currentStats.votes_2024.toLocaleString()} votes)
+              <strong>’19:</strong> {currLineage.c19} ({currLineage.v19.toLocaleString()})
             </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="badge-highlight" style={{
-              fontWeight: 700,
-              padding: '2px 8px',
-              borderRadius: '4px',
-              background: currentStats.swing >= 0 ? '#dcfce7' : '#fee2e2',
-              color: currentStats.swing >= 0 ? '#166534' : '#991b1b'
-            }}>
-              {currentStats.swing >= 0 ? `+${currentStats.swing}% Vote Share Gain` : `${currentStats.swing}% Vote Share Drop`}
+            <ArrowRight size={12} style={{ color: 'var(--text-muted)' }} />
+            <span>
+              <strong>’22:</strong> {currLineage.c22} ({currLineage.v22.toLocaleString()})
+            </span>
+            <ArrowRight size={12} style={{ color: 'var(--text-muted)' }} />
+            <span>
+              <strong>’24:</strong> {currLineage.c24} ({currLineage.v24.toLocaleString()})
             </span>
           </div>
         </div>
@@ -204,15 +259,31 @@ export default function PartyHub({
               className={`cat-pill-btn ${partyFilter === 'ALL' ? 'active default-active' : ''}`}
               onClick={() => setPartyFilter('ALL')}
             >
-              <span>All Booths</span>
-              <span className="cat-pill-num">{totalBooths}</span>
+              <span>All 169 Booths</span>
+            </button>
+            <button
+              className={`cat-pill-btn ${partyFilter === 'CORE_151' ? 'active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'CORE_151' ? 'ALL' : 'CORE_151')}
+              title="Historical Core Booths 1-151 (100% continuous from 2017 to 2024)"
+            >
+              <Building2 size={13} />
+              <span>Core Booths (1-151)</span>
+              <span className="cat-pill-num">151</span>
+            </button>
+            <button
+              className={`cat-pill-btn ${partyFilter === 'AUXILIARY_18' ? 'active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'AUXILIARY_18' ? 'ALL' : 'AUXILIARY_18')}
+              title="Auxiliary Booths 152-169 created in 2022 rationalization"
+            >
+              <span>Auxiliary Booths (152-169)</span>
+              <span className="cat-pill-num">18</span>
             </button>
             <button
               className={`cat-pill-btn aap-filter ${partyFilter === 'AAP_WINS' ? 'active aap-active' : ''}`}
               onClick={() => setPartyFilter(partyFilter === 'AAP_WINS' ? 'ALL' : 'AAP_WINS')}
             >
               <Award size={13} className="pill-icon aap-text" />
-              <span>AAP Won</span>
+              <span>’24 AAP Lead</span>
               <span className="cat-pill-num">{aapWins}</span>
             </button>
             <button
@@ -220,7 +291,7 @@ export default function PartyHub({
               onClick={() => setPartyFilter(partyFilter === 'BJP_WINS' ? 'ALL' : 'BJP_WINS')}
             >
               <Award size={13} className="pill-icon bjp-text" />
-              <span>BJP Won</span>
+              <span>’24 BJP Lead</span>
               <span className="cat-pill-num">{bjpWins}</span>
             </button>
             <button
@@ -228,125 +299,73 @@ export default function PartyHub({
               onClick={() => setPartyFilter(partyFilter === 'INC_WINS' ? 'ALL' : 'INC_WINS')}
             >
               <Award size={13} className="pill-icon inc-text" />
-              <span>INC Won</span>
+              <span>’24 INC Lead</span>
               <span className="cat-pill-num">{incWins}</span>
             </button>
             <button
-              className={`cat-pill-btn sad-filter ${partyFilter === 'SAD_WINS' ? 'active sad-active' : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'SAD_WINS' ? 'ALL' : 'SAD_WINS')}
+              className={`cat-pill-btn inc-filter ${partyFilter === 'INC_2019_WINS' ? 'active inc-active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'INC_2019_WINS' ? 'ALL' : 'INC_2019_WINS')}
+              title="Booths Won by INC in 2019 Lok Sabha (118 Booths)"
             >
-              <Award size={13} className="pill-icon sad-text" />
-              <span>SAD Won</span>
-              <span className="cat-pill-num">{sadWins}</span>
+              <span>’19 INC Lead</span>
+              <span className="cat-pill-num">118</span>
             </button>
             <button
-              className={`cat-pill-btn ${partyFilter === 'FLIPPED_ONLY' ? 'active' : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'FLIPPED_ONLY' ? 'ALL' : 'FLIPPED_ONLY')}
-              title="Only show booths that changed party between 2022 and 2024"
+              className={`cat-pill-btn bjp-filter ${partyFilter === 'BJP_2019_WINS' ? 'active bjp-active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'BJP_2019_WINS' ? 'ALL' : 'BJP_2019_WINS')}
+              title="Booths Won by BJP in 2019 Lok Sabha (33 Booths)"
             >
-              <Flame size={13} />
-              <span>Flipped Booths</span>
-              <span className="cat-pill-num">{flippedCount}</span>
+              <span>’19 BJP Lead</span>
+              <span className="cat-pill-num">33</span>
             </button>
             <button
-              className={`cat-pill-btn ${partyFilter === 'RETAINED_ONLY' ? 'active' : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'RETAINED_ONLY' ? 'ALL' : 'RETAINED_ONLY')}
-              title="Only show booths retained by the same party"
+              className={`cat-pill-btn inc-filter ${partyFilter === 'INC_2017_WINS' ? 'active inc-active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'INC_2017_WINS' ? 'ALL' : 'INC_2017_WINS')}
+              title="Booths Won by INC in 2017 Vidhan Sabha (141 Booths)"
             >
-              <ShieldCheck size={13} />
-              <span>Retained</span>
-              <span className="cat-pill-num">{retainedCount}</span>
+              <span>’17 INC Wins</span>
+              <span className="cat-pill-num">141</span>
             </button>
             <button
-              className={`cat-pill-btn ${partyFilter === 'SURVEY_AAP_LEADS' ? 'active aap-active' : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'SURVEY_AAP_LEADS' ? 'ALL' : 'SURVEY_AAP_LEADS')}
-              title="Booths where AAP leads in 2026 ground survey"
+              className={`cat-pill-btn aap-filter ${partyFilter === 'AAP_2017_WINS' ? 'active aap-active' : ''}`}
+              onClick={() => setPartyFilter(partyFilter === 'AAP_2017_WINS' ? 'ALL' : 'AAP_2017_WINS')}
+              title="Booths Won by AAP in 2017 Vidhan Sabha (9 Booths)"
             >
-              <Award size={13} className="pill-icon aap-text" />
-              <span>'26 AAP Lead</span>
-              <span className="cat-pill-num">{m26.booths_led?.AAP || 86}</span>
-            </button>
-            <button
-              className={`cat-pill-btn ${partyFilter === 'SURVEY_INC_LEADS' ? 'active inc-active' : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'SURVEY_INC_LEADS' ? 'ALL' : 'SURVEY_INC_LEADS')}
-              title="Booths where INC leads in 2026 ground survey"
-            >
-              <Award size={13} className="pill-icon inc-text" />
-              <span>'26 INC Lead</span>
-              <span className="cat-pill-num">{m26.booths_led?.INC || 79}</span>
-            </button>
-            <button
-              className={`cat-pill-btn ${partyFilter === 'SURVEY_TIED' ? 'active' : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'SURVEY_TIED' ? 'ALL' : 'SURVEY_TIED')}
-              title="Booths where AAP and INC are Tied in 2026 ground survey"
-            >
-              <Flame size={13} />
-              <span>'26 Tied/Battleground</span>
-              <span className="cat-pill-num">{m26.booths_led?.TIED || 4}</span>
+              <span>’17 AAP Wins</span>
+              <span className="cat-pill-num">9</span>
             </button>
           </div>
         ) : (
           <div className="cat-pill-group">
             <button
-              className={`cat-pill-btn ${partyFilter === 'ALL' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
+              className={`cat-pill-btn ${partyFilter === 'ALL' ? 'active' : ''}`}
               onClick={() => setPartyFilter('ALL')}
             >
-              <span>All Booths</span>
-              <span className="cat-pill-num">{totalBooths}</span>
+              <span>All 169 Booths</span>
             </button>
             <button
-              className={`cat-pill-btn won ${partyFilter === 'WON_BOTH' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
+              className={`cat-pill-btn ${partyFilter === 'WON_BOTH' ? 'active' : ''}`}
               onClick={() => setPartyFilter(partyFilter === 'WON_BOTH' ? 'ALL' : 'WON_BOTH')}
-              title={`Won in both 2022 & 2024 by ${selectedParty}`}
             >
               <ShieldCheck size={13} />
-              <span>Won Both</span>
+              <span>Won Both ’22 & ’24</span>
               <span className="cat-pill-num">{currentStats.won_both_count}</span>
             </button>
             <button
-              className={`cat-pill-btn gained ${partyFilter === 'GAINED' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
+              className={`cat-pill-btn ${partyFilter === 'GAINED' ? 'active' : ''}`}
               onClick={() => setPartyFilter(partyFilter === 'GAINED' ? 'ALL' : 'GAINED')}
-              title={`Gained by ${selectedParty} in 2024 (Flip In)`}
             >
               <TrendingUp size={13} />
               <span>Gained in ’24</span>
               <span className="cat-pill-num">{currentStats.gained_count}</span>
             </button>
             <button
-              className={`cat-pill-btn lost ${partyFilter === 'LOST_24' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
+              className={`cat-pill-btn ${partyFilter === 'LOST_24' ? 'active' : ''}`}
               onClick={() => setPartyFilter(partyFilter === 'LOST_24' ? 'ALL' : 'LOST_24')}
-              title={`Won in 2022, lost in 2024 by ${selectedParty} (Flip Out)`}
             >
               <TrendingDown size={13} />
               <span>Lost in ’24</span>
               <span className="cat-pill-num">{currentStats.lost_24_count}</span>
-            </button>
-            <button
-              className={`cat-pill-btn weak ${partyFilter === 'WEAK' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'WEAK' ? 'ALL' : 'WEAK')}
-              title={`Vote share fell below 20% in 2024 for ${selectedParty}`}
-            >
-              <AlertTriangle size={13} />
-              <span>Weak (&lt;20%)</span>
-              <span className="cat-pill-num">{currentStats.weak_count}</span>
-            </button>
-            <button
-              className={`cat-pill-btn lost-both ${partyFilter === 'LOST_BOTH' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'LOST_BOTH' ? 'ALL' : 'LOST_BOTH')}
-              title={`Lost both 2022 and 2024 by ${selectedParty}`}
-            >
-              <ShieldAlert size={13} />
-              <span>Lost Both</span>
-              <span className="cat-pill-num">{currentStats.lost_both_count}</span>
-            </button>
-            <button
-              className={`cat-pill-btn won ${partyFilter === 'SURVEY_LEAD' ? `active ${selectedParty.toLowerCase()}-active` : ''}`}
-              onClick={() => setPartyFilter(partyFilter === 'SURVEY_LEAD' ? 'ALL' : 'SURVEY_LEAD')}
-              title={`Booths where ${selectedParty} leads in 2026 ground survey`}
-            >
-              <Award size={13} />
-              <span>'26 Survey Lead</span>
-              <span className="cat-pill-num">{m26.booths_led?.[selectedParty] || 0}</span>
             </button>
           </div>
         )}

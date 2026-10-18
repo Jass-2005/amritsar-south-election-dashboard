@@ -25,6 +25,9 @@ export default function Header({
             <span className="section-title-text">DASHBOARD</span>
             <span className="header-separator">/</span>
             <span className="header-crumb">19-AMRITSAR SOUTH</span>
+            <span className="header-election-badge hide-mobile">
+              4 ELECTIONS: 2017 · 2019 · 2022 · 2024
+            </span>
           </div>
         </div>
 

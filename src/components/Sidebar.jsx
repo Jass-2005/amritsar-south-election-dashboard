@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, MapPin, Users, FileSpreadsheet, ExternalLink, X, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, MapPin, Users, FileSpreadsheet, ExternalLink, X, ClipboardList, BarChart3, Building2 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab, isOpen, onClose }) {
   const handleNavClick = (tab) => {
@@ -22,8 +22,8 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, onClose }) {
         {/* Top Logo & Close button on mobile */}
         <div className="sidebar-logo-wrap">
           <a 
-            href="https://dsidein.com/amritsar-south-2022-2024" 
-            title="Dsidein Command Center — https://dsidein.com/amritsar-south-2022-2024"
+            href="https://dsidein.com/amritsar-south-2017-2024" 
+            title="Dsidein Command Center — https://dsidein.com/amritsar-south-2017-2024"
             className="sidebar-brand-link"
           >
             <img 
@@ -57,6 +57,15 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, onClose }) {
           </button>
 
           <button 
+            className={`sidebar-nav-btn ${activeTab === 'ANALYTICS' ? 'active' : ''}`}
+            onClick={() => handleNavClick('ANALYTICS')}
+            title="10-Year Trend & Booth Continuity Audit"
+          >
+            <BarChart3 size={20} />
+            <span className="sidebar-label hide-desktop">Audit & Trends</span>
+          </button>
+
+          <button 
             className={`sidebar-nav-btn ${activeTab === 'PARTY_HUB' ? 'active' : ''}`}
             onClick={() => handleNavClick('PARTY_HUB')}
             title="Party Intelligence Hub"
@@ -75,14 +84,14 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, onClose }) {
           </button>
 
           <a 
-            href="./Amritsar_South_Master_Booth_Analysis_AAP_INC.xlsx" 
-            download="Amritsar_South_Master_Booth_Analysis_AAP_INC.xlsx"
+            href="./Amritsar_South_2017_2019_2022_2024_Master_Comparison.xlsx" 
+            download="Amritsar_South_2017_2019_2022_2024_Master_Comparison.xlsx"
             className="sidebar-nav-btn"
-            title="Master Excel Spreadsheet (.xlsx)"
+            title="Master 4-Election Excel (.xlsx)"
             onClick={() => { if (onClose) onClose(); }}
           >
             <FileSpreadsheet size={20} />
-            <span className="sidebar-label hide-desktop">Master Excel</span>
+            <span className="sidebar-label hide-desktop">4-Election Excel</span>
           </a>
 
           <a 
@@ -99,9 +108,9 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, onClose }) {
           <a 
             href="https://dsidein.com" 
             target="_blank" 
-            rel="noreferrer"
-            className="sidebar-nav-btn"
-            title="Dsidein Platform — dsidein.com"
+            rel="noopener noreferrer"
+            className="sidebar-nav-btn sidebar-external-link"
+            title="Dsidein AI Intelligence Platform"
             onClick={() => { if (onClose) onClose(); }}
           >
             <ExternalLink size={18} />
@@ -109,18 +118,13 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, onClose }) {
           </a>
         </nav>
 
-        {/* Bottom Profile Avatar */}
+        {/* Bottom Profile Anchor */}
         <div className="sidebar-bottom">
-          <div className="sidebar-avatar" title="Dsidein Command Center">
-            <img 
-              src="./dsidein_logo_transparent.png" 
-              alt="Dsidein User" 
-              style={{ width: '22px', height: '22px', objectFit: 'contain' }} 
-            />
+          <div className="sidebar-avatar" title="Dsidein Command Center User">
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--color-primary)' }}>DS</span>
           </div>
         </div>
       </aside>
     </>
   );
 }
-

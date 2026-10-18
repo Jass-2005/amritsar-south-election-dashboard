@@ -7,6 +7,8 @@ import PartyHub from './components/PartyHub';
 import BoothGrid from './components/BoothGrid';
 import BoothModal from './components/BoothModal';
 import CustomDropdown from './components/CustomDropdown';
+import KPIBanner from './components/KPIBanner';
+import AnalyticsView from './components/AnalyticsView';
 import { 
   Search, 
   RotateCcw, 
@@ -22,12 +24,14 @@ import {
   ExternalLink,
   ShieldAlert,
   Database,
-  ClipboardList
+  ClipboardList,
+  Building2,
+  Award
 } from 'lucide-react';
 
 export default function App() {
-  const [theme, setTheme] = useState('light'); // Default to light theme matching Dsidein screenshot
-  const [activeTab, setActiveTab] = useState('DASHBOARD');
+  const [theme, setTheme] = useState('light');
+  const [activeTab, setActiveTab] = useState('DASHBOARD'); // 'DASHBOARD', 'ANALYTICS', 'PARTY_HUB', 'BOOTHS'
   const [selectedParty, setSelectedParty] = useState('ALL'); // 'ALL', 'AAP', 'INC', 'BJP', 'SAD'
   const [partyFilter, setPartyFilter] = useState('ALL'); 
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,7 +51,7 @@ export default function App() {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setMobileMenuOpen(false);
-    if (tab === 'DASHBOARD') {
+    if (tab === 'DASHBOARD' || tab === 'ANALYTICS') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tab === 'PARTY_HUB') {
       const el = document.querySelector('.dsidein-registry-card');
@@ -118,15 +122,22 @@ export default function App() {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(b => 
         b.booth_no.toString() === q ||
-        b.village_english.toLowerCase().includes(q) ||
-        b.village_punjabi.includes(q) ||
-        b.exact_name_punjabi.includes(q)
+        (b.polling_station_en && b.polling_station_en.toLowerCase().includes(q)) ||
+        (b.village_english && b.village_english.toLowerCase().includes(q)) ||
+        (b.location_en && b.location_en.toLowerCase().includes(q)) ||
+        (b.sections_en && b.sections_en.toLowerCase().includes(q)) ||
+        (b.village_punjabi && b.village_punjabi.includes(q)) ||
+        (b.polling_station_pa && b.polling_station_pa.includes(q))
       );
     }
 
     // 2. Filter logic based on mode
     if (selectedParty === 'ALL') {
-      if (partyFilter === 'INC_WINS') {
+      if (partyFilter === 'CORE_151') {
+        result = result.filter(b => b.booth_no <= 151);
+      } else if (partyFilter === 'AUXILIARY_18') {
+        result = result.filter(b => b.booth_no > 151);
+      } else if (partyFilter === 'INC_WINS') {
         result = result.filter(b => b.data_2024.winner_party === 'INC');
       } else if (partyFilter === 'AAP_WINS') {
         result = result.filter(b => b.data_2024.winner_party === 'AAP');
@@ -134,20 +145,18 @@ export default function App() {
         result = result.filter(b => b.data_2024.winner_party === 'BJP');
       } else if (partyFilter === 'SAD_WINS') {
         result = result.filter(b => b.data_2024.winner_party === 'SAD');
+      } else if (partyFilter === 'INC_2017_WINS') {
+        result = result.filter(b => b.data_2017?.winner_party === 'INC');
+      } else if (partyFilter === 'AAP_2017_WINS') {
+        result = result.filter(b => b.data_2017?.winner_party === 'AAP');
+      } else if (partyFilter === 'INC_2019_WINS') {
+        result = result.filter(b => b.data_2019?.winner_party === 'INC');
+      } else if (partyFilter === 'BJP_2019_WINS') {
+        result = result.filter(b => b.data_2019?.winner_party === 'BJP');
       } else if (partyFilter === 'FLIPPED_ONLY') {
         result = result.filter(b => b.comparison.is_flip);
       } else if (partyFilter === 'RETAINED_ONLY') {
         result = result.filter(b => !b.comparison.is_flip);
-      } else if (partyFilter === 'SURVEY_AAP_LEADS') {
-        result = result.filter(b => b.data_2026?.leading_party === 'AAP');
-      } else if (partyFilter === 'SURVEY_INC_LEADS') {
-        result = result.filter(b => b.data_2026?.leading_party === 'INC');
-      } else if (partyFilter === 'SURVEY_TIED') {
-        result = result.filter(b => b.data_2026?.leading_party === 'TIED');
-      } else if (partyFilter === 'SURVEY_UNDECIDED') {
-        result = result.filter(b => b.data_2026?.leading_party === 'UNDECIDED');
-      } else if (partyFilter === 'SURVEY_PENDING') {
-        result = result.filter(b => !b.data_2026 || b.data_2026?.sample_size === 0);
       }
     } else {
       // Party-specific mode (AAP, INC, SAD, BJP)
@@ -173,9 +182,6 @@ export default function App() {
           if (partyFilter === 'LOST_BOTH') {
             return w22 !== selectedParty && w24 !== selectedParty;
           }
-          if (partyFilter === 'SURVEY_LEAD') {
-            return b.data_2026?.leading_party === selectedParty;
-          }
           return true;
         });
       }
@@ -187,20 +193,18 @@ export default function App() {
       switch (sortBy) {
         case 'BOOTH_DESC':
           return b.booth_no - a.booth_no;
-        case 'VOTES_DESC':
-          return b.data_2024[pKey] - a.data_2024[pKey];
-        case 'VOTES_ASC':
-          return a.data_2024[pKey] - b.data_2024[pKey];
         case 'TURNOUT_DESC':
-          return b.data_2024.total - a.data_2024.total;
+          return (b.data_2024?.total || 0) - (a.data_2024?.total || 0);
+        case 'TURNOUT_22_DESC':
+          return (b.data_2022?.total || 0) - (a.data_2022?.total || 0);
+        case 'TURNOUT_19_DESC':
+          return ((b.data_2019?.total || 0) - (a.data_2019?.total || 0));
+        case 'TURNOUT_17_DESC':
+          return ((b.data_2017?.total || 0) - (a.data_2017?.total || 0));
         case 'MARGIN_DESC':
-          return b.data_2024.margin - a.data_2024.margin;
+          return (b.data_2024?.margin || 0) - (a.data_2024?.margin || 0);
         case 'SURVEY_SAMPLE_DESC':
           return (b.data_2026?.sample_size || 0) - (a.data_2026?.sample_size || 0);
-        case 'SURVEY_AAP_DESC':
-          return (b.data_2026?.aap || 0) - (a.data_2026?.aap || 0);
-        case 'SURVEY_INC_DESC':
-          return (b.data_2026?.inc || 0) - (a.data_2026?.inc || 0);
         case 'BOOTH_ASC':
         default:
           return a.booth_no - b.booth_no;
@@ -212,23 +216,17 @@ export default function App() {
 
   // Sort options for CustomDropdown
   const sortOptions = useMemo(() => {
-    const opts = [
+    return [
       { value: 'BOOTH_ASC', label: 'Booth No. (1 → 169)' },
       { value: 'BOOTH_DESC', label: 'Booth No. (169 → 1)' },
       { value: 'TURNOUT_DESC', label: 'Highest 2024 Turnout' },
-      { value: 'MARGIN_DESC', label: 'Highest 2024 Margin' },
+      { value: 'TURNOUT_22_DESC', label: 'Highest 2022 Turnout' },
+      { value: 'TURNOUT_19_DESC', label: 'Highest 2019 Turnout' },
+      { value: 'TURNOUT_17_DESC', label: 'Highest 2017 Turnout' },
+      { value: 'MARGIN_DESC', label: 'Highest 2024 Lead Margin' },
       { value: 'SURVEY_SAMPLE_DESC', label: 'Highest 2026 Survey Sample' },
-      { value: 'SURVEY_AAP_DESC', label: 'Highest 2026 AAP (Nijjar) Votes' },
-      { value: 'SURVEY_INC_DESC', label: 'Highest 2026 INC (Bolaria) Votes' },
     ];
-    if (selectedParty !== 'ALL') {
-      opts.push(
-        { value: 'VOTES_DESC', label: `Highest ${selectedParty} Votes` },
-        { value: 'VOTES_ASC', label: `Lowest ${selectedParty} Votes` }
-      );
-    }
-    return opts;
-  }, [selectedParty]);
+  }, []);
 
   // Reset all filters
   const handleResetToCompleteList = () => {
@@ -277,12 +275,12 @@ export default function App() {
           setSearchQuery={setSearchQuery}
         />
 
-        {/* Dsidein Official PDF Watermark (Active on all PDF exports & printing) */}
+        {/* Dsidein Official PDF Watermark */}
         <div className="dsidein-print-watermark" aria-hidden="true">
           <img src="./dsidein_logo_transparent.png" alt="Dsidein" className="watermark-logo-img" />
           <div className="watermark-brand-name">DSIDEIN</div>
-          <div className="watermark-sub-name">FIELD INTELLIGENCE & TELEMETRY</div>
-          <div className="watermark-url">https://dsidein.com/amritsar-south-2022-2024</div>
+          <div className="watermark-sub-name">4-ELECTION HISTORICAL INTELLIGENCE & AUDIT</div>
+          <div className="watermark-url">https://dsidein.com/amritsar-south-2017-2024</div>
         </div>
 
         {/* Print Master Report Header (Visible only on print) */}
@@ -293,7 +291,7 @@ export default function App() {
                 19-AMRITSAR SOUTH ASSEMBLY SEGMENT (AMRITSAR PC)
               </div>
               <div style={{ fontSize: '10pt', color: '#475569', marginTop: '2px' }}>
-                Comparative Booth Intelligence: 2022 Assembly vs 2024 Lok Sabha Polling
+                4-Election Master Comparative Intelligence: 2017 AE vs 2019 PE vs 2022 AE vs 2024 PE
               </div>
               <div style={{ fontSize: '8.5pt', color: '#64748b', marginTop: '4px' }}>
                 Active Filter: {selectedParty === 'ALL' ? 'Complete Master List' : `${selectedParty} Segment`} | Total Booths: {filteredBooths.length} of 169
@@ -301,33 +299,33 @@ export default function App() {
             </div>
             <div style={{ textAlign: 'right', fontSize: '8.5pt', color: '#334155' }}>
               <span style={{ fontWeight: 800, color: '#002b49' }}>DSIDEIN COMMAND CENTER</span><br />
-              <span>https://dsidein.com/amritsar-south-2022-2024</span>
+              <span>https://dsidein.com/amritsar-south-2017-2024</span>
             </div>
           </div>
         </div>
 
         {/* Scrollable Main Dashboard Area */}
         <main className="dsidein-main-body">
-          {/* Refined Minimal Page Title Bar (Replacing bulky hero banner) */}
+          {/* Page Title Bar */}
           <section className="dashboard-title-bar">
             <div className="title-text-group">
               <div className="constituency-tag">19-AMRITSAR SOUTH ASSEMBLY SEGMENT</div>
-              <h1 className="main-title">Comparative Booth Intelligence</h1>
+              <h1 className="main-title">4-Election Comparative Booth Intelligence</h1>
               <p className="main-subtitle">
-                2022 Vidhan Sabha vs 2024 Lok Sabha Polling Telemetry across all 169 Polling Stations (Amritsar PC)
+                Comprehensive 10-Year Polling Telemetry: <strong>2017 Assembly</strong>, <strong>2019 Lok Sabha</strong>, <strong>2022 Assembly</strong>, and <strong>2024 Lok Sabha</strong> across all 169 Polling Stations
               </p>
             </div>
 
             <div className="title-action-buttons">
               <a 
-                href="./Amritsar_South_AC19_2022_vs_2024_Booth_List.xlsx" 
-                download="Amritsar_South_AC19_2022_vs_2024_Booth_List.xlsx"
+                href="./Amritsar_South_2017_2019_2022_2024_Master_Comparison.xlsx" 
+                download="Amritsar_South_2017_2019_2022_2024_Master_Comparison.xlsx"
                 className="pill-action-btn green"
                 style={{ background: '#059669', color: '#ffffff', borderColor: '#047857' }}
-                title="Download Verified 2022 vs 2024 Booth List (Excel .xlsx with English & Punjabi Sheets)"
+                title="Download 4-Election Master Comparison Excel (.xlsx)"
               >
                 <span className="pill-btn-icon"><FileSpreadsheet size={14} /></span>
-                <span className="pill-btn-label">2022 vs 2024 Booth List (Excel)</span>
+                <span className="pill-btn-label">4-Election Master Excel</span>
               </a>
 
               <a 
@@ -335,46 +333,46 @@ export default function App() {
                 download="Amritsar_South_AC19_2022_vs_2024_Booth_List.pdf"
                 className="pill-action-btn red"
                 style={{ background: '#dc2626', color: '#ffffff', borderColor: '#b91c1c' }}
-                title="Download Verified 2022 vs 2024 Booth List PDF (36-Page Print Ready)"
+                title="Download Verified Booth List PDF"
               >
                 <span className="pill-btn-icon"><Printer size={14} /></span>
-                <span className="pill-btn-label">2022 vs 2024 Booth List (PDF)</span>
-              </a>
-
-              <a 
-                href="./Amritsar_South_Master_Booth_Analysis_AAP_INC.xlsx" 
-                download="Amritsar_South_Master_Booth_Analysis_AAP_INC.xlsx"
-                className="pill-action-btn outline"
-                title="Download Master Analysis Spreadsheet (Excel .xlsx with AAP/INC/BJP/SAD Sheets)"
-              >
-                <span className="pill-btn-icon"><FileSpreadsheet size={14} /></span>
-                <span className="pill-btn-label">Master Excel</span>
+                <span className="pill-btn-label">Booth List (PDF)</span>
               </a>
 
               <a 
                 href="./Amritsar_South_Detailed_169_Boothwise_Masterplan.pdf" 
                 download="Amritsar_South_Detailed_169_Boothwise_Masterplan.pdf"
                 className="pill-action-btn purple"
-                title="Download Complete 169-Booth Master Plan in English (PDF with Watermark)"
+                title="Download 169-Booth Master Plan (PDF)"
               >
                 <span className="pill-btn-icon"><ClipboardList size={14} /></span>
-                <span className="pill-btn-label">Master Plan (EN PDF)</span>
+                <span className="pill-btn-label">Master Plan (EN)</span>
               </a>
 
               <a 
                 href="./Amritsar_South_Detailed_169_Boothwise_Masterplan_Punjabi.pdf" 
                 download="Amritsar_South_Detailed_169_Boothwise_Masterplan_Punjabi.pdf"
                 className="pill-action-btn amber"
-                title="Download 169 Boothwise Detailed Field Operations Plan in Punjabi (PDF with Watermark)"
+                title="Download 169-Booth Master Plan in Punjabi (PDF)"
               >
                 <span className="pill-btn-icon"><ClipboardList size={14} /></span>
-                <span className="pill-btn-label">ਮਾਸਟਰ ਪਲਾਨ (ਪੰਜਾਬੀ PDF)</span>
+                <span className="pill-btn-label">ਮਾਸਟਰ ਪਲਾਨ (PA)</span>
               </a>
+
+              <button
+                onClick={() => handleTabChange('ANALYTICS')}
+                className="pill-action-btn blue"
+                style={{ background: '#0284c7', color: '#ffffff', borderColor: '#0369a1' }}
+                title="View Official ECI Verification & Booth Name vs Number Audit Report"
+              >
+                <span className="pill-btn-icon"><Building2 size={14} /></span>
+                <span className="pill-btn-label">Verification & Continuity Audit</span>
+              </button>
 
               <button 
                 onClick={handlePrintMasterReport}
                 className="pill-action-btn outline"
-                title="Export Current View as PDF with Dsidein Watermark"
+                title="Export View as PDF"
               >
                 <span className="pill-btn-icon"><Printer size={14} /></span>
                 <span className="pill-btn-label">Export PDF</span>
@@ -382,90 +380,31 @@ export default function App() {
             </div>
           </section>
 
-          {/* Dsidein 4 Minimal KPI Metric Cards */}
-          <section className="dsidein-kpi-grid">
-            {/* KPI 1: Live Telemetry */}
-            <div className="dsidein-kpi-card">
-              <div className="kpi-top-row">
-                <div className="kpi-icon-pill icon-blue">
-                  <Compass size={18} />
-                </div>
-              </div>
-              <div className="kpi-label">POLLING STATIONS</div>
-              <div className="kpi-value text-blue">169 Booths</div>
-              <div className="kpi-sub-pill text-blue">
-                ● 100% Monitored & Verified
-              </div>
-            </div>
+          {/* 4-Election Historical KPI Highlights */}
+          <KPIBanner summary={summary} />
 
-            {/* KPI 2: Total Turnout */}
-            <div className="dsidein-kpi-card">
-              <div className="kpi-top-row">
-                <div className="kpi-icon-pill icon-orange">
-                  <Activity size={18} />
-                </div>
-              </div>
-              <div className="kpi-label">2024 VALID VOTES</div>
-              <div className="kpi-value">82,725</div>
-              <div className="kpi-sub-pill text-orange">
-                ● 100% Form-20 EVM Match
-              </div>
-            </div>
+          {/* Conditional View: Audit & Trends Tab vs Dashboard Tab */}
+          {activeTab === 'ANALYTICS' && (
+            <section style={{ marginBottom: '24px' }}>
+              <AnalyticsView 
+                booths={booths} 
+                summary={summary} 
+                onSelectBooth={(b) => setSelectedBooth(b)} 
+              />
+            </section>
+          )}
 
-            {/* KPI 3: 2026 Ground Survey */}
-            <div className="dsidein-kpi-card survey-kpi">
-              <div className="kpi-top-row">
-                <div className="kpi-icon-pill" style={{ background: 'rgba(5, 150, 105, 0.12)', color: '#059669' }}>
-                  <Users size={18} />
-                </div>
-              </div>
-              <div className="kpi-label">2026 GROUND SURVEY</div>
-              <div className="kpi-value" style={{ color: '#059669' }}>16,732 Sample</div>
-              <div className="kpi-sub-pill" style={{ color: '#059669', background: 'rgba(5, 150, 105, 0.08)' }}>
-                ● 169 Booths | AAP 82 vs INC 83 Leads (35% Und.)
-              </div>
-            </div>
-
-            {/* KPI 4: AAP - 2024 Win */}
-            <div className="dsidein-kpi-card aap-kpi">
-              <div className="kpi-top-row">
-                <div className="kpi-icon-pill icon-blue">
-                  <CheckCircle2 size={18} />
-                </div>
-              </div>
-              <div className="kpi-label">AAP (KULDEEP DHALIWAL)</div>
-              <div className="kpi-value text-blue">28,431</div>
-              <div className="kpi-sub-pill text-blue">
-                ● 102 Wins (34.4% Share | +6,649 Lead)
-              </div>
-            </div>
-
-            {/* KPI 4: BJP - Urban Surge */}
-            <div className="dsidein-kpi-card bjp-kpi">
-              <div className="kpi-top-row">
-                <div className="kpi-icon-pill icon-orange">
-                  <BarChart3 size={18} />
-                </div>
-              </div>
-              <div className="kpi-label">BJP (TARANJIT SANDHU)</div>
-              <div className="kpi-value text-orange">15,819</div>
-              <div className="kpi-sub-pill text-orange">
-                ● 35 Wins (19.1% Share | +17.6% Swing)
-              </div>
-            </div>
-          </section>
-
-          {/* Unified Registry Card (Styled after 'Team Progress Today' in Dsidein) */}
+          {/* Unified Registry Card */}
           <section className="dsidein-registry-card">
             {/* Card Top Title Row */}
             <div className="registry-card-header">
               <div className="registry-title-group">
                 <div className="registry-title-row">
-                  <h2 className="registry-title">Booth Performance Registry</h2>
+                  <h2 className="registry-title">4-Election Booth Performance Registry</h2>
                   <span className="registry-booth-count">{filteredBooths.length} Booths</span>
                 </div>
                 <p className="registry-subtitle">
-                  Detailed booth-by-booth vote tally, turnout, winners, and margin shifts across 19-Amritsar South
+                  Historical vote tallies for 2017, 2019, 2022, 2024 and institutional continuity status across 19-Amritsar South
                 </p>
               </div>
 
@@ -498,11 +437,7 @@ export default function App() {
                 <input
                   type="text"
                   className="toolbar-search-input"
-                  placeholder={
-                    selectedParty === 'ALL'
-                      ? 'Search all 169 booths by number or locality (e.g. 104, Kot Khalsa, ਕੋਟ ਖਾਲਸਾ)...'
-                      : `Search ${selectedParty} performance by booth no. or locality (e.g. 53, Kot Khalsa)...`
-                  }
+                  placeholder="Search 169 booths by number, school, area (e.g. 1, Amrit School, ਕੋਟ ਖਾਲਸਾ)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   aria-label="Filter booths"
@@ -513,7 +448,7 @@ export default function App() {
                 <button
                   onClick={handlePrintMasterReport}
                   className="btn-toolbar-pdf"
-                  title="Export Current Table View as PDF with Dsidein Watermark"
+                  title="Export Current Table View as PDF"
                 >
                   <Printer size={14} />
                   <span>Export PDF</span>

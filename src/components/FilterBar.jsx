@@ -1,11 +1,15 @@
 import React from 'react';
-import { Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { Search, SlidersHorizontal, ArrowUpDown, Building2 } from 'lucide-react';
 
 export default function FilterBar({
   searchQuery,
   setSearchQuery,
   activeFilter,
   setActiveFilter,
+  winner17Filter,
+  setWinner17Filter,
+  winner19Filter,
+  setWinner19Filter,
   winner22Filter,
   setWinner22Filter,
   winner24Filter,
@@ -16,12 +20,10 @@ export default function FilterBar({
 }) {
   const quickFilters = [
     { id: 'ALL', label: `All Booths (${totalCount})` },
-    { id: 'RETAINED_INC', label: 'Retained INC (69)' },
-    { id: 'RETAINED_AAP', label: 'Retained AAP (18)' },
-    { id: 'FLIPPED_TO_BJP', label: 'Flipped to BJP (25)' },
-    { id: 'FLIPPED_TO_AAP', label: 'Flipped to AAP (63)' },
-    { id: 'FLIPPED_TO_INC', label: 'Flipped to INC (42)' },
-    { id: 'SEKHWAN_LOST', label: 'Sekhwan Lost Booths (36)' },
+    { id: 'CORE_151', label: 'Historic Core (1-151)' },
+    { id: 'AUXILIARY_18', label: 'Auxiliary ’22 (152-169)' },
+    { id: 'FLIPPED_ONLY', label: 'Flipped Booths (2022→2024)' },
+    { id: 'RETAINED_ONLY', label: 'Retained Booths (2022→2024)' },
   ];
 
   return (
@@ -33,38 +35,62 @@ export default function FilterBar({
           <input
             type="text"
             className="search-input"
-            placeholder="Search booth number, village (e.g. 104, Fateh Nangal, ਫਤਿਹ ਨੰਗਲ)..."
+            placeholder="Search booth number, school, area (e.g. 1, Amrit School, ਅੰਮ੍ਰਿਤ ਸਕੂਲ)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
         <div className="filter-selects">
+          {/* 2017 Winner Filter */}
+          <select
+            className="filter-select"
+            value={winner17Filter || 'ALL'}
+            onChange={(e) => setWinner17Filter && setWinner17Filter(e.target.value)}
+            aria-label="Filter by 2017 Winner"
+          >
+            <option value="ALL">2017 Winner: All</option>
+            <option value="INC">2017: INC Won (141)</option>
+            <option value="AAP">2017: AAP Won (9)</option>
+            <option value="SAD">2017: SAD Won (1)</option>
+          </select>
+
+          {/* 2019 Winner Filter */}
+          <select
+            className="filter-select"
+            value={winner19Filter || 'ALL'}
+            onChange={(e) => setWinner19Filter && setWinner19Filter(e.target.value)}
+            aria-label="Filter by 2019 Winner"
+          >
+            <option value="ALL">2019 Winner: All</option>
+            <option value="INC">2019: INC Won (118)</option>
+            <option value="BJP">2019: BJP Won (33)</option>
+          </select>
+
           {/* 2022 Winner Filter */}
           <select
             className="filter-select"
-            value={winner22Filter}
-            onChange={(e) => setWinner22Filter(e.target.value)}
+            value={winner22Filter || 'ALL'}
+            onChange={(e) => setWinner22Filter && setWinner22Filter(e.target.value)}
             aria-label="Filter by 2022 Winner"
           >
             <option value="ALL">2022 Winner: All</option>
-            <option value="INC">2022: INC Won</option>
-            <option value="AAP">2022: AAP Won</option>
-            <option value="Sekhwan">2022: Sekhwan Won</option>
+            <option value="AAP">2022: AAP Won (145)</option>
+            <option value="SAD">2022: SAD Won (13)</option>
+            <option value="INC">2022: INC Won (11)</option>
           </select>
 
           {/* 2024 Winner Filter */}
           <select
             className="filter-select"
-            value={winner24Filter}
-            onChange={(e) => setWinner24Filter(e.target.value)}
+            value={winner24Filter || 'ALL'}
+            onChange={(e) => setWinner24Filter && setWinner24Filter(e.target.value)}
             aria-label="Filter by 2024 Winner"
           >
             <option value="ALL">2024 Winner: All</option>
-            <option value="INC">2024: INC Won</option>
-            <option value="AAP">2024: AAP Won</option>
-            <option value="BJP">2024: BJP Won</option>
-            <option value="SAD">2024: SAD Won</option>
+            <option value="AAP">2024: AAP Won (84)</option>
+            <option value="BJP">2024: BJP Won (43)</option>
+            <option value="INC">2024: INC Won (42)</option>
           </select>
 
           {/* Sort By Dropdown */}
@@ -74,15 +100,16 @@ export default function FilterBar({
             onChange={(e) => setSortBy(e.target.value)}
             aria-label="Sort Booths"
           >
-            <option value="BOOTH_ASC">Sort: Booth (1 → 223)</option>
-            <option value="BOOTH_DESC">Sort: Booth (223 → 1)</option>
-            <option value="MARGIN_24_DESC">Highest 2024 Margin</option>
+            <option value="BOOTH_ASC">Sort: Booth (1 → 169)</option>
+            <option value="BOOTH_DESC">Sort: Booth (169 → 1)</option>
+            <option value="MARGIN_24_DESC">Highest 2024 Lead Margin</option>
             <option value="TURNOUT_24_DESC">Highest 2024 Turnout</option>
-            <option value="TURNOUT_DIFF_DESC">Turnout Gain (Top)</option>
-            <option value="TURNOUT_DIFF_ASC">Turnout Drop (Top)</option>
-            <option value="BJP_GAIN_DESC">Highest BJP Gain</option>
-            <option value="INC_SWING_DESC">Highest INC Swing</option>
-            <option value="AAP_SWING_DESC">Highest AAP Swing</option>
+            <option value="TURNOUT_22_DESC">Highest 2022 Turnout</option>
+            <option value="TURNOUT_19_DESC">Highest 2019 Turnout</option>
+            <option value="TURNOUT_17_DESC">Highest 2017 Turnout</option>
+            <option value="BJP_GAIN_DESC">Highest BJP 2024 Inroads</option>
+            <option value="AAP_22_DESC">Highest AAP 2022 Votes</option>
+            <option value="INC_17_DESC">Highest INC 2017 Votes</option>
           </select>
         </div>
       </div>

@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { LayoutGrid, List, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, Printer } from 'lucide-react';
+import { LayoutGrid, List, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, Printer, CheckCircle2, Info } from 'lucide-react';
 
 export default function BoothGrid({ 
   booths, 
   selectedParty, 
-  onSelectBooth,
-  onExportBoothPdf,
+  onSelectBooth, 
+  onExportBoothPdf, 
   partyFilter 
 }) {
   const [viewMode, setViewMode] = useState('LIST'); // 'LIST' or 'GRID'
 
   const isAllMode = selectedParty === 'ALL';
-  const pKey = selectedParty.toLowerCase(); // 'aap' or 'inc' if not 'ALL'
+  const pKey = selectedParty.toLowerCase(); // 'aap', 'inc', 'bjp', 'sad'
 
   if (booths.length === 0) {
     return (
@@ -32,13 +32,18 @@ export default function BoothGrid({
           <span className="list-count-badge">{booths.length} Booths</span>
           <span className="list-filter-label">
             {isAllMode && (
-              partyFilter === 'ALL' ? 'Complete Master List (All 169 Booths)' :
-              partyFilter === 'AAP_WINS' ? 'Booths Won by AAP in 2024 (102 Booths)' :
-              partyFilter === 'BJP_WINS' ? 'Booths Won by BJP in 2024 (35 Booths)' :
-              partyFilter === 'INC_WINS' ? 'Booths Won by INC in 2024 (32 Booths)' :
-              partyFilter === 'SAD_WINS' ? 'Booths Won by SAD in 2024 (0 Booths)' :
-              partyFilter === 'FLIPPED_ONLY' ? 'Flipped Booths (62 Booths - Changed Party)' :
-              partyFilter === 'RETAINED_ONLY' ? 'Retained Booths (107 Booths - Same Party)' : 'Booths'
+              partyFilter === 'ALL' ? 'Complete 4-Election Master List (All 169 Booths)' :
+              partyFilter === 'CORE_151' ? 'Historical Core Booths 1-151 (100% Retained from 2017 to 2024)' :
+              partyFilter === 'AUXILIARY_18' ? 'Auxiliary Booths 152-169 (Added in 2022 Delimitation/Rationalization)' :
+              partyFilter === 'AAP_WINS' ? 'Booths Won by AAP in 2024 (84 Booths)' :
+              partyFilter === 'BJP_WINS' ? 'Booths Won by BJP in 2024 (43 Booths)' :
+              partyFilter === 'INC_WINS' ? 'Booths Won by INC in 2024 (42 Booths)' :
+              partyFilter === 'INC_2017_WINS' ? 'Booths Won by INC in 2017 (141 Booths)' :
+              partyFilter === 'AAP_2017_WINS' ? 'Booths Won by AAP in 2017 (9 Booths)' :
+              partyFilter === 'INC_2019_WINS' ? 'Booths Won by INC in 2019 (118 Booths)' :
+              partyFilter === 'BJP_2019_WINS' ? 'Booths Won by BJP in 2019 (33 Booths)' :
+              partyFilter === 'FLIPPED_ONLY' ? 'Flipped Booths (2022 vs 2024)' :
+              partyFilter === 'RETAINED_ONLY' ? 'Retained Booths (2022 vs 2024)' : 'Booths'
             )}
             {!isAllMode && (
               partyFilter === 'ALL' ? `All 169 Booths for ${selectedParty}` :
@@ -74,37 +79,39 @@ export default function BoothGrid({
       </div>
 
       {/* =========================================================
-          VIEW MODE 1: CLEAN LIST TABLE
+          VIEW MODE 1: 4-ELECTION LIST TABLE
       ========================================================= */}
       {viewMode === 'LIST' && (
         <div className="clean-table-wrap">
           <table className="clean-table">
             <thead>
               {isAllMode ? (
-                /* Complete List Headers */
+                /* Complete List Headers with 4 Elections */
                 <tr>
-                  <th style={{ width: '60px', textAlign: 'center' }}>No.</th>
-                  <th>Village / Polling Station</th>
-                  <th>1. 2022 Win</th>
-                  <th>2. 2024 Win</th>
-                  <th>3. 2026 Survey</th>
-                  <th>3-Wave Trajectory</th>
-                  <th style={{ textAlign: 'right' }}>2026 Sample</th>
-                  <th style={{ textAlign: 'right' }}>2024 Turnout</th>
+                  <th style={{ width: '55px', textAlign: 'center' }}>No.</th>
+                  <th>Polling Station / Location</th>
+                  <th>Continuity</th>
+                  <th>'17 Win</th>
+                  <th>'19 Win</th>
+                  <th>'22 Win</th>
+                  <th>'24 Win</th>
+                  <th>'26 Survey</th>
+                  <th>4-Election Trajectory</th>
+                  <th style={{ textAlign: 'right' }}>'24 Turnout</th>
                   <th style={{ width: '84px', textAlign: 'center' }}>Action</th>
                 </tr>
               ) : (
                 /* Party-Specific Headers */
                 <tr>
-                  <th style={{ width: '60px', textAlign: 'center' }}>No.</th>
-                  <th>Village / Polling Station</th>
-                  <th style={{ textAlign: 'right' }}>2022 ({selectedParty})</th>
-                  <th style={{ textAlign: 'right' }}>2024 ({selectedParty})</th>
-                  <th style={{ textAlign: 'right' }}>2026 Survey</th>
-                  <th style={{ textAlign: 'right' }}>'22→'24 Shift</th>
-                  <th>2022 Win</th>
-                  <th>2024 Win</th>
-                  <th>2026 Survey</th>
+                  <th style={{ width: '55px', textAlign: 'center' }}>No.</th>
+                  <th>Polling Station / Location</th>
+                  <th style={{ textAlign: 'right' }}>'17 ({selectedParty})</th>
+                  <th style={{ textAlign: 'right' }}>'19 ({selectedParty})</th>
+                  <th style={{ textAlign: 'right' }}>'22 ({selectedParty})</th>
+                  <th style={{ textAlign: 'right' }}>'24 ({selectedParty})</th>
+                  <th>'22 Win</th>
+                  <th>'24 Win</th>
+                  <th>'26 Survey</th>
                   <th>Status</th>
                   <th style={{ width: '84px', textAlign: 'center' }}>Action</th>
                 </tr>
@@ -112,80 +119,101 @@ export default function BoothGrid({
             </thead>
             <tbody>
               {booths.map((b) => {
-                const w22 = b.data_2022.winner_party;
-                const w24 = b.data_2024.winner_party;
+                const isCore = b.booth_no <= 151;
+                const d17 = b.data_2017 || {};
+                const d19 = b.data_2019 || {};
+                const d22 = b.data_2022 || {};
+                const d24 = b.data_2024 || {};
                 const d26 = b.data_2026 || {};
-                const diff = b.comparison.turnout_diff;
-                const pct = b.comparison.turnout_pct;
+
+                const w17 = d17.exists ? d17.winner_party : '—';
+                const w19 = d19.exists ? d19.winner_party : '—';
+                const w22 = d22.winner_party || '—';
+                const w24 = d24.winner_party || '—';
 
                 if (isAllMode) {
                   return (
                     <tr 
                       key={b.booth_no}
                       onClick={() => onSelectBooth(b)}
-                      title={`Click to inspect Booth #${b.booth_no}`}
+                      title={`Click to inspect 4-Election Dossier for Booth #${b.booth_no}`}
                     >
                       <td style={{ textAlign: 'center' }}>
                         <span className="booth-avatar-badge">{b.booth_no}</span>
                       </td>
 
                       <td>
-                        <div className="village-en">{b.village_english}</div>
-                        <div className="village-pa punjabi-font">{b.village_punjabi}</div>
+                        <div className="village-en">{b.polling_station_en || b.village_english}</div>
+                        <div className="village-pa punjabi-font">{b.polling_station_pa || b.village_punjabi}</div>
                       </td>
 
                       <td>
-                        <span className={`mini-winner ${w22}`}>{w22}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
-                          +{b.data_2022.margin}
+                        <span className={`continuity-pill ${isCore ? 'core' : 'auxiliary'}`}>
+                          {isCore ? 'Core 1-151' : 'Auxiliary ’22'}
                         </span>
                       </td>
 
                       <td>
-                        <span className={`mini-winner ${w24}`}>{w24}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
-                          +{b.data_2024.margin}
-                        </span>
-                      </td>
-
-                      <td>
-                        {d26.sample_size > 0 ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span className={`mini-winner ${d26.leading_party}`}>
-                              {d26.leading_party === 'UNDECIDED' ? 'Undecided' : d26.leading_party === 'TIED' ? 'Tied' : d26.leading_party}
-                            </span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }} title={`Top Candidate: ${d26.leading_candidate}`}>
-                              {d26.leading_candidate?.split(' ')[0]}
-                            </span>
+                        {d17.exists ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span className={`mini-winner ${w17}`}>{w17}</span>
+                            <span className="pct-sub">+{d17.margin}</span>
                           </div>
                         ) : (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pending</span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>—</span>
                         )}
                       </td>
 
                       <td>
-                        <span className={`cat-pill ${d26.trajectory_code === 'AAP_TRIPLE_STRONGHOLD' ? 'won' : d26.trajectory_code === 'INC_SURGE' ? 'lost' : 'neutral'}`} style={{ fontSize: '0.75rem' }}>
-                          {d26.trajectory || b.comparison.status_label}
+                        {d19.exists ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span className={`mini-winner ${w19}`}>{w19}</span>
+                            <span className="pct-sub">+{d19.margin}</span>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>—</span>
+                        )}
+                      </td>
+
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span className={`mini-winner ${w22}`}>{w22}</span>
+                          <span className="pct-sub">+{d22.margin}</span>
+                        </div>
+                      </td>
+
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span className={`mini-winner ${w24}`}>{w24}</span>
+                          <span className="pct-sub">+{d24.margin}</span>
+                        </div>
+                      </td>
+
+                      <td>
+                        {d26.sample_size > 0 ? (
+                          <span className={`mini-winner ${d26.leading_party}`}>
+                            {d26.leading_party}
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>—</span>
+                        )}
+                      </td>
+
+                      <td>
+                        <span className="trajectory-table-text" style={{ fontSize: '0.75rem' }}>
+                          {b.trajectory_4_elections}
                         </span>
                       </td>
 
                       <td style={{ textAlign: 'right', fontWeight: 600 }}>
-                        {d26.sample_size > 0 ? (
-                          <span>{d26.sample_size} <span className="pct-sub">({d26.total_decided} dec.)</span></span>
-                        ) : (
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>—</span>
-                        )}
-                      </td>
-
-                      <td style={{ textAlign: 'right', fontWeight: 600 }}>
-                        {b.data_2024.total.toLocaleString()}
+                        {d24.total?.toLocaleString() || '—'}
                       </td>
 
                       <td style={{ textAlign: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                           <button
                             className="btn-table-pdf"
-                            title={`Export Booth #${b.booth_no} as PDF with Dsidein Watermark`}
+                            title={`Export Booth #${b.booth_no} as PDF`}
                             onClick={(e) => {
                               e.stopPropagation();
                               onExportBoothPdf(b);
@@ -209,14 +237,10 @@ export default function BoothGrid({
                 }
 
                 // Party-Specific Row
-                const v22 = b.data_2022[pKey] || 0;
-                const pct22 = b.data_2022[`${pKey}_pct`] || 0.0;
-                const v24 = b.data_2024[pKey] || 0;
-                const pct24 = b.data_2024[`${pKey}_pct`] || 0.0;
-                const v26 = d26[pKey] || 0;
-                const pct26 = d26[`${pKey}_decided_pct`] || 0.0;
-                const partyDiff = v24 - v22;
-                const swing = (pct24 - pct22).toFixed(1);
+                const v17 = d17.exists ? (d17[pKey] || 0) : '—';
+                const v19 = d19.exists ? (d19[pKey] || 0) : '—';
+                const v22 = d22[pKey] || 0;
+                const v24 = d24[pKey] || 0;
 
                 let catLabel = 'Lost Both';
                 let catClass = 'neutral';
@@ -231,11 +255,6 @@ export default function BoothGrid({
                   catClass = 'lost';
                 }
 
-                if (pct24 < 20.0 && b.data_2024.total > 0) {
-                  catLabel = 'Weak (<20%)';
-                  catClass = 'weak';
-                }
-
                 return (
                   <tr 
                     key={b.booth_no}
@@ -247,35 +266,26 @@ export default function BoothGrid({
                     </td>
 
                     <td>
-                      <div className="village-en">{b.village_english}</div>
-                      <div className="village-pa punjabi-font">{b.village_punjabi}</div>
+                      <div className="village-en">{b.polling_station_en || b.village_english}</div>
+                      <div className="village-pa punjabi-font">{b.polling_station_pa || b.village_punjabi}</div>
+                    </td>
+
+                    <td style={{ textAlign: 'right' }}>
+                      <strong>{v17}</strong>
+                    </td>
+
+                    <td style={{ textAlign: 'right' }}>
+                      <strong>{v19}</strong>
                     </td>
 
                     <td style={{ textAlign: 'right' }}>
                       <strong>{v22}</strong>
-                      <span className="pct-sub">({pct22}%)</span>
+                      <span className="pct-sub">({d22[`${pKey}_pct`]}%)</span>
                     </td>
 
                     <td style={{ textAlign: 'right' }}>
                       <strong>{v24}</strong>
-                      <span className="pct-sub">({pct24}%)</span>
-                    </td>
-
-                    <td style={{ textAlign: 'right' }}>
-                      {d26.sample_size > 0 ? (
-                        <>
-                          <strong style={{ color: 'var(--color-gain)' }}>{v26}</strong>
-                          <span className="pct-sub">({pct26}%)</span>
-                        </>
-                      ) : (
-                        <span style={{ color: 'var(--text-muted)' }}>—</span>
-                      )}
-                    </td>
-
-                    <td style={{ textAlign: 'right' }}>
-                      <span className={`diff-pill ${partyDiff >= 0 ? 'gain' : 'loss'}`}>
-                        {partyDiff >= 0 ? `+${partyDiff}` : partyDiff} ({swing > 0 ? `+${swing}%` : `${swing}%`})
-                      </span>
+                      <span className="pct-sub">({d24[`${pKey}_pct`]}%)</span>
                     </td>
 
                     <td>
@@ -300,7 +310,7 @@ export default function BoothGrid({
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                         <button
                           className="btn-table-pdf"
-                          title={`Export Booth #${b.booth_no} as PDF with Dsidein Watermark`}
+                          title={`Export Booth #${b.booth_no} as PDF`}
                           onClick={(e) => {
                             e.stopPropagation();
                             onExportBoothPdf(b);
@@ -328,110 +338,22 @@ export default function BoothGrid({
       )}
 
       {/* =========================================================
-          VIEW MODE 2: MINIMAL 3-COLUMN GRID CARDS
+          VIEW MODE 2: 4-ELECTION GRID CARDS
       ========================================================= */}
       {viewMode === 'GRID' && (
         <div className="grid-cards-layout">
           {booths.map((b) => {
-            const w22 = b.data_2022.winner_party;
-            const w24 = b.data_2024.winner_party;
+            const isCore = b.booth_no <= 151;
+            const d17 = b.data_2017 || {};
+            const d19 = b.data_2019 || {};
+            const d22 = b.data_2022 || {};
+            const d24 = b.data_2024 || {};
             const d26 = b.data_2026 || {};
-            const diff = b.comparison.turnout_diff;
 
-            if (isAllMode) {
-              return (
-                <div 
-                  key={b.booth_no} 
-                  className="booth-card"
-                  onClick={() => onSelectBooth(b)}
-                >
-                  <div className="card-top-row">
-                    <span className="card-booth-badge">#{b.booth_no}</span>
-                    <span className={`cat-pill ${d26.trajectory_code === 'AAP_TRIPLE_STRONGHOLD' ? 'won' : d26.trajectory_code === 'INC_SURGE' ? 'lost' : 'neutral'}`} style={{ fontSize: '0.7rem' }}>
-                      {d26.trajectory || b.comparison.status_label}
-                    </span>
-                  </div>
-
-                  <div className="card-village-name">{b.village_english}</div>
-                  <div className="card-village-punjabi punjabi-font">{b.village_punjabi}</div>
-
-                  <div className="card-stats-box">
-                    <div className="card-stat-col">
-                      <span className="card-stat-label">2022 Win</span>
-                      <span className={`mini-winner ${w22}`} style={{ marginTop: '3px' }}>
-                        {w22} (+{b.data_2022.margin})
-                      </span>
-                      <span className="pct-sub" style={{ margin: '4px 0 0 0' }}>{b.data_2022.total} polled</span>
-                    </div>
-
-                    <div className="card-stat-col">
-                      <span className="card-stat-label">2024 Win</span>
-                      <span className={`mini-winner ${w24}`} style={{ marginTop: '3px' }}>
-                        {w24} (+{b.data_2024.margin})
-                      </span>
-                      <span className="pct-sub" style={{ margin: '4px 0 0 0' }}>{b.data_2024.total} polled</span>
-                    </div>
-
-                    <div className="card-stat-col">
-                      <span className="card-stat-label">2026 Survey</span>
-                      <span className={`mini-winner ${d26.leading_party || 'PENDING'}`} style={{ marginTop: '3px' }}>
-                        {d26.leading_party === 'UNDECIDED' ? 'Undecided' : d26.leading_party === 'TIED' ? 'Tied' : (d26.leading_party || 'Pending')}
-                      </span>
-                      <span className="pct-sub" style={{ margin: '4px 0 0 0' }}>
-                        {d26.sample_size > 0 ? `${d26.sample_size} sampled` : 'Pending'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="card-footer-row">
-                    <div>
-                      <span className="footer-label">Sample/Turnout: </span>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {d26.sample_size || 0} spl / {b.data_2024.total}
-                      </span>
-                    </div>
-                    <button
-                      className="btn-card-pdf"
-                      title={`Export Booth #${b.booth_no} as PDF`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onExportBoothPdf(b);
-                      }}
-                    >
-                      <Printer size={12} />
-                      <span>PDF</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            }
-
-            // Party-Specific Card
-            const v22 = b.data_2022[pKey] || 0;
-            const pct22 = b.data_2022[`${pKey}_pct`] || 0.0;
-            const v24 = b.data_2024[pKey] || 0;
-            const pct24 = b.data_2024[`${pKey}_pct`] || 0.0;
-            const v26 = d26[pKey] || 0;
-            const pct26 = d26[`${pKey}_decided_pct`] || 0.0;
-            const partyDiff = v24 - v22;
-
-            let catLabel = 'Lost Both';
-            let catClass = 'neutral';
-            if (w22 === selectedParty && w24 === selectedParty) {
-              catLabel = 'Won Both';
-              catClass = 'won';
-            } else if (w22 !== selectedParty && w24 === selectedParty) {
-              catLabel = 'Gained in ’24';
-              catClass = 'gained';
-            } else if (w22 === selectedParty && w24 !== selectedParty) {
-              catLabel = `Lost to ${w24}`;
-              catClass = 'lost';
-            }
-
-            if (pct24 < 20.0 && b.data_2024.total > 0) {
-              catLabel = 'Weak (<20%)';
-              catClass = 'weak';
-            }
+            const w17 = d17.exists ? d17.winner_party : '—';
+            const w19 = d19.exists ? d19.winner_party : '—';
+            const w22 = d22.winner_party || '—';
+            const w24 = d24.winner_party || '—';
 
             return (
               <div 
@@ -440,49 +362,59 @@ export default function BoothGrid({
                 onClick={() => onSelectBooth(b)}
               >
                 <div className="card-top-row">
-                  <span className="card-booth-badge">#{b.booth_no}</span>
-                  <span className={`cat-pill ${catClass}`}>{catLabel}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="card-booth-badge">#{b.booth_no}</span>
+                    <span className={`continuity-pill ${isCore ? 'core' : 'auxiliary'}`}>
+                      {isCore ? 'Core 1-151' : 'Auxiliary ’22'}
+                    </span>
+                  </div>
+                  <span className="trajectory-pill-mini">
+                    {b.trajectory_4_elections}
+                  </span>
                 </div>
 
-                <div className="card-village-name">{b.village_english}</div>
-                <div className="card-village-punjabi punjabi-font">{b.village_punjabi}</div>
+                <div className="card-village-name">{b.polling_station_en || b.village_english}</div>
+                <div className="card-village-punjabi punjabi-font">{b.polling_station_pa || b.village_punjabi}</div>
 
-                <div className="card-stats-box">
+                <div className="card-stats-box" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px', fontSize: '0.72rem' }}>
                   <div className="card-stat-col">
-                    <span className="card-stat-label">2022 Votes</span>
-                    <strong>{v22}</strong> <span className="pct-sub">({pct22}%)</span>
-                    <span className={`mini-winner ${w22}`} style={{ marginTop: '4px' }}>{w22} Won</span>
+                    <span className="card-stat-label">’17 Win</span>
+                    <span className={`mini-winner ${w17}`} style={{ marginTop: '2px' }}>
+                      {w17} {d17.margin ? `(+${d17.margin})` : ''}
+                    </span>
+                    <span className="pct-sub" style={{ margin: '2px 0 0 0' }}>{d17.total || '—'} v</span>
                   </div>
 
                   <div className="card-stat-col">
-                    <span className="card-stat-label">2024 Votes</span>
-                    <strong>{v24}</strong> <span className="pct-sub">({pct24}%)</span>
-                    <span className={`mini-winner ${w24}`} style={{ marginTop: '4px' }}>{w24} Won</span>
+                    <span className="card-stat-label">’19 Win</span>
+                    <span className={`mini-winner ${w19}`} style={{ marginTop: '2px' }}>
+                      {w19} {d19.margin ? `(+${d19.margin})` : ''}
+                    </span>
+                    <span className="pct-sub" style={{ margin: '2px 0 0 0' }}>{d19.total || '—'} v</span>
                   </div>
 
                   <div className="card-stat-col">
-                    <span className="card-stat-label">2026 Survey</span>
-                    {d26.sample_size > 0 ? (
-                      <>
-                        <strong style={{ color: 'var(--color-gain)' }}>{v26}</strong> <span className="pct-sub">({pct26}% dec.)</span>
-                        <span className={`mini-winner ${d26.leading_party}`} style={{ marginTop: '4px' }}>
-                          {d26.leading_party} Lead
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span style={{ color: 'var(--text-muted)' }}>Pending</span>
-                        <span className="pct-sub" style={{ marginTop: '4px' }}>Awaiting sample</span>
-                      </>
-                    )}
+                    <span className="card-stat-label">’22 Win</span>
+                    <span className={`mini-winner ${w22}`} style={{ marginTop: '2px' }}>
+                      {w22} (+{d22.margin})
+                    </span>
+                    <span className="pct-sub" style={{ margin: '2px 0 0 0' }}>{d22.total} v</span>
+                  </div>
+
+                  <div className="card-stat-col">
+                    <span className="card-stat-label">’24 Win</span>
+                    <span className={`mini-winner ${w24}`} style={{ marginTop: '2px' }}>
+                      {w24} (+{d24.margin})
+                    </span>
+                    <span className="pct-sub" style={{ margin: '2px 0 0 0' }}>{d24.total} v</span>
                   </div>
                 </div>
 
                 <div className="card-footer-row">
                   <div>
-                    <span className="footer-label">'22→'24 Shift: </span>
-                    <span className={`diff-pill ${partyDiff >= 0 ? 'gain' : 'loss'}`}>
-                      {partyDiff >= 0 ? `+${partyDiff}` : partyDiff}
+                    <span className="footer-label">Location: </span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      {b.location_en?.split(',')[0]}
                     </span>
                   </div>
                   <button
